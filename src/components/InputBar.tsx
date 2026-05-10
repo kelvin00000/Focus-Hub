@@ -21,7 +21,7 @@ export default function InputBar({showShareFileButtton}: props){
     }, []);
 
     //SEARCH METHOD CLEAR
-    function clearSearchMethod(e){
+    function clearSearchMethod(e: React.MouseEvent<HTMLButtonElement>){
         e.stopPropagation();
         setSearchMethod('none')
     }
