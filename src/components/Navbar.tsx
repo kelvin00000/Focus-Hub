@@ -12,7 +12,7 @@ type props = {
 export default function Navbar({title, showMenuButton}:props){
     return(
         <>
-            <div className="fixed flex items-center justify-between mt-[5%] ml-[5%] w-[90%] lg:mt-[2%] lg:ml-[2.5%] lg:w-[95%]">
+            <div className="fixed flex items-center justify-between mt-[5%] ml-[5%] w-[90%] lg:mt-[2%] lg:ml-[2.5%] lg:w-[95%] z-50">
                 <div className="flex flex-row gap-2.5">
                     <img className="w-[30px] h-[30px] rounded-[100%]" src={logo} />
                     <span className="text-[#F5F5F5] font-fam-bold text-2xl">{title}</span>

@@ -8,7 +8,7 @@
 
 @theme inline {
     --background-image-bgdark: linear-gradient(to top, #0A1A2F, #1F1F1F);
-    --color-bglight: ;
+    /* --background-image-bglight: linear-gradient(to top, #0A1A2F, #1F1F1F); */
     --color-bgforeground: #071322;
     --color-bgtext: F5F5F5;
 
@@ -138,4 +138,13 @@
   html {
     @apply font-sans;
     }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
