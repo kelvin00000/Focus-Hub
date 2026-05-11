@@ -1,24 +1,66 @@
-// import { Document, Page, pdfjs } from "react-pdf";
-import { BotIcon } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/TextLayer.css";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import WarningModal from "./Modal";
+import { BotIcon, DownloadIcon } from "lucide-react";
 import { FcGoogle } from "react-icons/fc"
 
-// pdfjs.GlobalWorkerOptions.workerSrc =
-//   `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc =
+  new URL(
+    "pdfjs-dist/build/pdf.worker.min.mjs",
+    import.meta.url
+  ).toString();
 
+// CHANGE TIME TYPE TO NUMBER WHEN USING FIRESTORE TIMESTAMPS
 type props = {
     sender: string,
-    searchMethod: string | undefined,
-    query: string | undefined,
-    message: string,
+    profileImage?: string,
+    searchMethod?: string,
+    query?: string,
+    message?: string,
+    previewUrl?: string,
+    originalUrl?: string,
     tag: string,
+    time: string,
     isUserMessage: boolean
 }
 
-export default function ChatMessage({sender, searchMethod, query, message, tag, isUserMessage}: props){
+
+export default function ChatMessage({sender, profileImage, searchMethod, query, message, previewUrl, originalUrl, tag, time, isUserMessage}: props){
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const timerRef = useRef<number | null>(null);
+    const [text, setText] = useState("");
+
+    useEffect(() => {
+        fetch(`${previewUrl}`)
+        .then((res) => res.text())
+        .then((data) => setText(data));
+    }, []);
+
+    const handleHoldStart = () => {
+        timerRef.current = setTimeout(() => {
+            setShowDeleteModal(true);
+        }, 600);
+    };
+    const handleHoldEnd = () => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+        }
+    };
+
+
     return(
         <>
             <div className={`flex ${isUserMessage?'justify-end':'justify-start'} w-full`}>
-                <div className="flex flex-col shrink-0 gap-10px p-[15px] max-w-[85%] text-[#F5F5F5] bg-bgforeground rounded-[20px] border border-gray-800 lg:max-w-[65%]">
+                <img className={`${isUserMessage?'hidden':'mr-[5px] w-[30px] h-[30px] rounded-full'}`} src={profileImage} />
+                <div
+                    onMouseDown={handleHoldStart}
+                    onMouseUp={handleHoldEnd}
+                    onMouseLeave={handleHoldEnd}
+                    onTouchStart={handleHoldStart}
+                    onTouchEnd={handleHoldEnd}
+                    className="flex flex-col shrink-0 gap-10px p-[15px] max-w-[82%] text-[#F5F5F5] bg-bgforeground rounded-[20px] border border-gray-800 lg:max-w-[65%]">
                     <div className="mb-[10px] font-light italic">{
                         isUserMessage?''
                         : searchMethod==='AI Search'? (
@@ -43,10 +85,52 @@ export default function ChatMessage({sender, searchMethod, query, message, tag, 
                         </>
                     : ''
                     }
-                    <div className=" font-[100px]">{message}</div>
-                    <div className="mt-[15px] text-[15px] text-blue-950 italic">{tag}</div>
+
+                    {tag==='image'
+                        ? <img className="object-cover rounded-[18px]" src={previewUrl} onClick={() => {window.open(originalUrl)}} />
+                        :tag==='pdf'
+                        ? <div className="max-h-[140px] overflow-hidden">
+                            <Document file={previewUrl} onClick={() => {window.open(originalUrl)}}>
+                                <Page pageNumber={1} width={250} height={25} />
+                            </Document>
+                        </div>
+                        :tag==='doc'
+                        ?<div className="max-h-[140px] overflow-hidden">
+                            <Document file={previewUrl} onClick={() => {window.open(originalUrl)}}>
+                                <Page pageNumber={1} width={250} height={25} />
+                            </Document>
+                        </div>
+                        :tag==='text'
+                        ?<div className="">
+                            <pre className="whitespace-pre-wrap text-sm">
+                                {text}
+                            </pre>
+                        </div>
+                        :<div className="">{message}</div>
+                    }
+
+                    <div className="flex items-end justify-between mt-[15px]">
+                        <div className="text-[15px] text-blue-950 italic">{tag}</div>
+
+                        <div className="flex flex-col items-center justify-center gap-1.5">
+                            {tag==='doc'||tag==='image'||tag==='text'||tag==='pdf'
+                                ?<button
+                                    className="p-2.5 rounded-full border border-gray-800 bg-[#0A1A2F] cursor-pointer"
+                                    onClick={() => {
+                                        // place download function call here
+                                    }}
+                                >
+                                    <DownloadIcon size={18} color="#F5F5F5" />
+                                </button>
+                                :''
+                            }
+                            <span className="text-[13px]">{time}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            {showDeleteModal && (<WarningModal message="Delete this message. This cannot be undone." isDeleteWarning={true} setShowDeleteModal={setShowDeleteModal} />)}
         </>
     )
 }

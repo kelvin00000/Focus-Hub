@@ -11,7 +11,7 @@ type props = {
 export default function InputBar({showShareFileButtton}: props){
     const [searchMethod, setSearchMethod] = useState('none');
     const [placeholderText, setPlaceholderText] = useState('Type a message here');
-    const sampleTexts = ['Upload a documenent', 'Search for anything', 'Type a message here'];
+    const sampleTexts = ['Upload a document', 'Search for anything', 'Type a message here'];
 
     useEffect(() => {
         let index = 0;

@@ -1,0 +1,5 @@
+	Initiation & Signaling: When you press "call," your phone sends a signal to the nearest cell tower requesting permission to make a call.
+
+	Authentication: The network checks your SIM card/IMEI number (your identity) to verify you are authorized to use the service.
+
+	Digitization & Encoding: The microphone turns your voice into an analog signal, which a processor immediately converts into digital binary data (0s and 1s).
