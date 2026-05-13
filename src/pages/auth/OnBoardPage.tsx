@@ -5,7 +5,7 @@ export default function OnBoardPage(){
         <>
             <title>Welcome</title>
 
-            <Navbar title={"Welcome"} showMenuButton={false} />
+            <Navbar title={"Welcome"} showTitle={true} showProfileIcon={true} showMenuButton={false} />
 
             <section className="flex items-center justify-center w-full h-screen bg-bgdark">
                 working
