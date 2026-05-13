@@ -1,40 +1,84 @@
+import { useState } from "react";
 import { Trash2 } from "lucide-react";
 
-//USE THIS SAME MODAL FOR LOG OUT OR REMOVE ACCOUNT WARNING
 
 type props = {
     message: string,
+    isMessageModal: boolean,
     isDeleteWarning: boolean,
-    setShowDeleteModal: React.Dispatch<
+    isJoinMeetingModal: boolean,
+    isCreateMeetingModal: boolean
+    setShowModal: React.Dispatch<
     React.SetStateAction<boolean>
   >;
 }
 
-export default function WarningModal({message, isDeleteWarning, setShowDeleteModal}: props){
+export default function WarningModal({message, isMessageModal, isDeleteWarning, isJoinMeetingModal, isCreateMeetingModal, setShowModal}: props){
+    const [inputText, setinputText] = useState(localStorage.getItem("inputText") || "");
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setinputText(e.target.value);
+        localStorage.setItem(
+            "inputText",
+            e.target.value
+        );
+    };
+
+    function joinMeeting(){
+
+    }
+    function createMeeting(){
+
+    }
+
     return(
         <>
            <div className="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm">
-                <div className="w-[300px] rounded-3xl border border-[#0A1A2F] bg-[#02101F] p-4 shadow-2xl">
-                    <div className="mt-1 rounded-2xl border border-[#0A1A2F] bg-[#031829] p-4">
-                        <p className="text-[15px] text-[#F5F5F5]">
+                <div className="w-[300px] rounded-3xl border border-[#0A1A2F] bg-bgforeground p-4 shadow-2xl">
+                    <div className="mt-1 rounded-2xl border border-[#0A1A2F] bg-[#0A1A2F] p-4">
+                        <p className="mb-8 text-[15px] text-[#F5F5F5] text-center">
                             {message}
                         </p>
+
+                        {(isJoinMeetingModal || isCreateMeetingModal) &&
+                            <input
+                                value={inputText}
+                                onChange={handleChange}
+                                type="text"
+                                placeholder={isJoinMeetingModal?"Meeting Code":isCreateMeetingModal?"Group Name":""}
+                                className=" w-full py-2 text-center text-white placeholder:text-gray-500 bg-transparent border-0 border-b border-gray-600 outline-none focus:outline-none focus:ring-0 focus:border-gray-600 autofill:bg-transparent"
+                            />
+                        }
                     </div>
 
                     <div className="mt-6 flex items-center justify-end gap-3">
                         <button
-                        onClick={() => {setShowDeleteModal(false)}}
+                        onClick={() => {setShowModal(false)}}
                         className="rounded-xl border border-[#0A1A2F] px-4 py-2 text-sm text-gray-300 transition hover:bg-white/5">
-                            Cancel
+                            Close
                         </button>
 
-                        {isDeleteWarning
+                        {
+                            isMessageModal || isCreateMeetingModal || isJoinMeetingModal?''
+                            :isDeleteWarning
                             ?<button className="flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-gray-300">
                                 <Trash2 size={16} />
                                 Delete
                             </button>
                             :<button className="flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-gray-300">
                                 Continue
+                            </button>
+                        }
+
+                        {(isJoinMeetingModal || isCreateMeetingModal) &&
+                            <button
+                                className="px-4 py-2 text-bgforeground rounded-[15px] bg-bgtext cursor-pointer"
+                                onClick={() => {
+                                    if (isJoinMeetingModal) joinMeeting()
+                                        else createMeeting()
+                                }}
+                            >
+                                {isJoinMeetingModal?"Join":"Create"}
                             </button>
                         }
                     </div>

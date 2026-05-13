@@ -23,12 +23,12 @@ type props = {
     originalUrl?: string,
     tag: string,
     time: string,
-    isUserMessage: boolean
+    isUser: boolean
 }
 
 
-export default function ChatMessage({sender, profileImage, searchMethod, query, message, previewUrl, originalUrl, tag, time, isUserMessage}: props){
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
+export default function ChatMessage({sender, profileImage, searchMethod, query, message, previewUrl, originalUrl, tag, time, isUser}: props){
+    const [showWarningModal, setShowWarningModal] = useState(false);
     const timerRef = useRef<number | null>(null);
     const [text, setText] = useState("");
 
@@ -40,8 +40,8 @@ export default function ChatMessage({sender, profileImage, searchMethod, query, 
 
     const handleHoldStart = () => {
         timerRef.current = setTimeout(() => {
-            setShowDeleteModal(true);
-        }, 600);
+            setShowWarningModal(true);
+        }, 1000);
     };
     const handleHoldEnd = () => {
         if (timerRef.current) {
@@ -52,8 +52,8 @@ export default function ChatMessage({sender, profileImage, searchMethod, query, 
 
     return(
         <>
-            <div className={`flex ${isUserMessage?'justify-end':'justify-start'} w-full`}>
-                <img className={`${isUserMessage?'hidden':'mr-[5px] w-[30px] h-[30px] rounded-full'}`} src={profileImage} />
+            <div className={`flex ${isUser?'justify-end':'justify-start'} w-full`}>
+                <img className={`${isUser?'hidden':'mr-[5px] w-[30px] h-[30px] rounded-full'}`} src={profileImage} />
                 <div
                     onMouseDown={handleHoldStart}
                     onMouseUp={handleHoldEnd}
@@ -62,7 +62,7 @@ export default function ChatMessage({sender, profileImage, searchMethod, query, 
                     onTouchEnd={handleHoldEnd}
                     className="flex flex-col shrink-0 gap-10px p-[15px] max-w-[82%] text-[#F5F5F5] bg-bgforeground rounded-[20px] border border-gray-800 lg:max-w-[65%]">
                     <div className="mb-[10px] font-light italic">{
-                        isUserMessage?''
+                        isUser?''
                         : searchMethod==='AI Search'? (
                             <div className="flex items-center gap-2.5">
                                 <BotIcon size={18} color="#F5F5F5" />
@@ -130,7 +130,16 @@ export default function ChatMessage({sender, profileImage, searchMethod, query, 
                 </div>
             </div>
 
-            {showDeleteModal && (<WarningModal message="Delete this message. This cannot be undone." isDeleteWarning={true} setShowDeleteModal={setShowDeleteModal} />)}
+            {showWarningModal &&
+                (<WarningModal
+                    message="Delete this message. This cannot be undone."
+                    isMessageModal={false}
+                    isDeleteWarning={true}
+                    isJoinMeetingModal={false}
+                    isCreateMeetingModal={false}
+                    setShowModal={setShowWarningModal}
+                />
+            )}
         </>
     )
 }

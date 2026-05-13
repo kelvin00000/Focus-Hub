@@ -5,7 +5,7 @@ export default function AnalyticsPage(){
         <>
             <title>Analytics</title>
 
-            <Navbar title={"Analytics"} showMenuButton={true} />
+            <Navbar title={"Analytics"} showTitle={true} showProfileIcon={true} showMenuButton={true} />
 
             <section className="flex items-center justify-center w-full h-screen bg-bgdark">
                 working
