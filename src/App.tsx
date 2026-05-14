@@ -1,18 +1,36 @@
+import { doc, getDoc, type DocumentData } from "firebase/firestore";
 import { Route, Routes, useLocation } from 'react-router';
 import './App.css';
+import { useState, useEffect } from "react";
+import { user, db} from "./services/authentication";
 import { AnimatePresence } from "framer-motion";
 import MainMenuPage from './pages/MainMenuPage';
 import PersonalStudyPage from './pages/PersonalStudyPage';
 import GroupCollaborationPage from './pages/groupCollaboration/GroupCollaborationPage';
 import ActiveCollaborationsPage from './pages/groupCollaboration/ActiveCollaborationPage';
 import SettingsPage from './pages/settings/SettingsPage';
-import AnalyticsPage from './pages/settings/AnalyticsPage';
+// import AnalyticsPage from './pages/settings/AnalyticsPage';
 import SignUpPage from './pages/auth/SignUpPage';
-import { useState } from 'react';
+
 
 function App() {
+    const [userInfo, setUserInfo] = useState<DocumentData|null>();
     const location = useLocation();
     const [ groupCollaborationPageTitle, setGroupCollaborationPageTitle ] = useState('')
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            if (user) {
+                const userSnap = await getDoc(doc(db, 'users', user.uid));
+                if (userSnap.exists()) {
+                    setUserInfo(userSnap.data() as DocumentData);
+                }
+            }
+        };
+        fetchUser();
+    }, [user]);
+
+
     const [ activeSessions ] = useState([
         {
             meetingName: "Networking group",
@@ -72,13 +90,13 @@ function App() {
     <>
         <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
-                <Route index element={<MainMenuPage />} />
-                <Route path="/personalstudy" element={<PersonalStudyPage />} />
-                <Route path="/groupcollaboration" element={<GroupCollaborationPage groupCollaborationPageTitle={groupCollaborationPageTitle} />} />
-                <Route path="/activecollaborations" element={<ActiveCollaborationsPage setGroupCollaborationPageTitle={setGroupCollaborationPageTitle} activeSessions={activeSessions} />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/analytics" element={<AnalyticsPage />} />
-                <Route path="/sign-up" element={<SignUpPage />} />
+                <Route path={userInfo?"/signup":"/"} element={<SignUpPage userInfo={userInfo} />} />
+                <Route path={userInfo?"/":"/navigate"} element={<MainMenuPage userInfo={userInfo} />} />
+                <Route path="/personalstudy" element={<PersonalStudyPage userInfo={userInfo} />} />
+                <Route path="/groupcollaboration" element={<GroupCollaborationPage userInfo={userInfo} groupCollaborationPageTitle={groupCollaborationPageTitle} />} />
+                <Route path="/activecollaborations" element={<ActiveCollaborationsPage userInfo={userInfo} setGroupCollaborationPageTitle={setGroupCollaborationPageTitle} activeSessions={activeSessions} />} />
+                <Route path="/settings" element={<SettingsPage userInfo={userInfo} setUserInfo={setUserInfo} />} />
+                {/* <Route path="/analytics" element={<AnalyticsPage userInfo={userInfo} />} /> */}
             </Routes>
         </AnimatePresence>
     </>

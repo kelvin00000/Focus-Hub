@@ -2,9 +2,12 @@ import { useState } from "react"
 import { Link } from "react-router"
 import Navbar from "../../components/Navbar"
 import { Users, CopyIcon, UserCog } from "lucide-react"
-import WarningModal from "../../components/Modal"
+import Modal from "../../components/Modal"
+import { useAuth } from "../../hooks/useAuth"
+import type { DocumentData } from "firebase/firestore"
 
 type props = {
+    userInfo: DocumentData|null|undefined
     setGroupCollaborationPageTitle: React.Dispatch<React.SetStateAction<string>>,
     activeSessions: {
         meetingName: string,
@@ -17,7 +20,8 @@ type props = {
     }[]
 }
 
-export default function ActiveCollaborationsPage({ setGroupCollaborationPageTitle, activeSessions }: props){
+export default function ActiveCollaborationsPage({ userInfo,  setGroupCollaborationPageTitle, activeSessions }: props){
+    useAuth();
     const [showJoinMeetingModal, setShowJoinMeetingModal] = useState(false);
     const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
 
@@ -25,7 +29,7 @@ export default function ActiveCollaborationsPage({ setGroupCollaborationPageTitl
         <>
             <title>Active Sessions</title>
 
-            <Navbar title={"Active Sessions"} showTitle={true} showProfileIcon={true} showMenuButton={true} />
+            <Navbar userInfo={userInfo} title={"Active Sessions"} showTitle={true} showProfileIcon={true} showMenuButton={true} />
 
             <section className="w-full h-screen text-bgtext bg-bgdark">
                 <div className="grid grid-cols-1 lg:grid-cols-3 place-items-center gap-5 pt-25 pb-[120px] w-full min-h-screen h-dvh overflow-y-scroll no-scrollbar [&>*]:w-[90%] lg:[&>*]:w-[350px] lg:gap-0">
@@ -95,22 +99,16 @@ export default function ActiveCollaborationsPage({ setGroupCollaborationPageTitl
 
 
             {showJoinMeetingModal && (
-                <WarningModal
+                <Modal
                     message="Enter group code to join"
-                    isMessageModal={false}
-                    isDeleteWarning={false}
                     isJoinMeetingModal={true}
-                    isCreateMeetingModal={false}
                     setShowModal={setShowJoinMeetingModal}
                 />
             )}
 
             {showCreateMeetingModal && (
-                <WarningModal
+                <Modal
                     message="Create a group name"
-                    isMessageModal={false}
-                    isDeleteWarning={false}
-                    isJoinMeetingModal={false}
                     isCreateMeetingModal={true}
                     setShowModal={setShowCreateMeetingModal}
                 />

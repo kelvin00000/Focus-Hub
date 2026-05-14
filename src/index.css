@@ -157,3 +157,24 @@ body,
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow:
+        0 0 8px #4A7DBB55,
+        0 0 16px #6EA8FE33;
+    }
+
+    50% {
+    box-shadow:
+        0 0 14px #6EA8FEaa,
+        0 0 28px #4A7DBB66,
+        0 0 42px #9CC4FF33;
+    }
+
+    100% {
+    box-shadow:
+        0 0 8px #4A7DBB55,
+        0 0 16px #6EA8FE33;
+    }
+}

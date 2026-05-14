@@ -4,14 +4,18 @@ import Navbar from "../../components/Navbar";
 import WorkArea from "../../components/WorkArea";
 import InputBar from "../../components/InputBar";
 import ActiveMembersModal from "./ActiveMembersModal";
+import { useAuth } from "../../hooks/useAuth";
+import type { DocumentData } from "firebase/firestore";
 
 // FETCH CURRENT GROUP INFO HERE AND PASS TO MODAL
 
 type props = {
+    userInfo: DocumentData|null|undefined
     groupCollaborationPageTitle: string
 }
 
-export default function GroupCollaborationPage({groupCollaborationPageTitle}: props){
+export default function GroupCollaborationPage({userInfo, groupCollaborationPageTitle}: props){
+    useAuth();
     const [showMembersModal, setShowMembersModal] = useState(false);
     const [ activeSession ] = useState({
         meetingName: "Networking group",
@@ -41,10 +45,10 @@ export default function GroupCollaborationPage({groupCollaborationPageTitle}: pr
         <>
             <title>Group</title>
 
-            <Navbar title={groupCollaborationPageTitle} showTitle={true} showProfileIcon={true} showMenuButton={true} />
+            <Navbar userInfo={userInfo} title={groupCollaborationPageTitle} showTitle={true} showProfileIcon={true} showMenuButton={true} />
 
             <button
-                className="fixed top-[7%] right-[3%] lg:top-[12%] lg:right-[2%] py-5 px-5 bg-[#0A1A2F] border border-gray-500 rounded-full cursor-pointer z-40"
+                className="fixed top-[8%] right-[5%] lg:top-[12%] lg:right-[3%] p-4 bg-[#0A1A2F] border border-gray-500 rounded-full cursor-pointer z-40"
                 onClick={() => { setShowMembersModal(true) }}
                 >
                     <Users size={20} className="text-bgtext" />

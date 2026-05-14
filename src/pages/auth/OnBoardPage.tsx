@@ -1,6 +1,8 @@
 import Navbar from "../../components/Navbar"
+import { useAuth } from "../../hooks/useAuth"
 
 export default function OnBoardPage(){
+    useAuth();
     return(
         <>
             <title>Welcome</title>

@@ -1,9 +1,30 @@
+import { onAuthStateChanged } from "firebase/auth";
+import { type DocumentData } from "firebase/firestore";
+import { auth } from "../services/authentication";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BookOpen, Zap, Users, Settings } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
 
-export default function MainMenuPage(){
+type props = {
+    userInfo: DocumentData|null|undefined
+}
+
+export default function MainMenuPage({userInfo}: props){
+    useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const userCheck = onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                navigate('/');
+            }
+        });
+        return userCheck;
+    }, [navigate]);
+
     return(
         <motion.div
             initial={{ x: "100%" }}
@@ -14,7 +35,7 @@ export default function MainMenuPage(){
             <>
                 <title>Menu</title>
 
-                <Navbar title={"Navigate"} showTitle={true} showProfileIcon={true} showMenuButton={false} />
+                <Navbar userInfo={userInfo} title={"Navigate"} showTitle={true} showProfileIcon={true} showMenuButton={false} />
 
                 <section className="min-h-screen flex items-center justify-start w-full h-screen bg-bgdark">
                     <div className="ml-[5%] flex flex-col gap-1 w-full">

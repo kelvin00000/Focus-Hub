@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
-import WarningModal from "./Modal";
+import Modal from "./Modal";
 import { BotIcon, DownloadIcon } from "lucide-react";
 import { FcGoogle } from "react-icons/fc"
 
@@ -131,12 +131,9 @@ export default function ChatMessage({sender, profileImage, searchMethod, query, 
             </div>
 
             {showWarningModal &&
-                (<WarningModal
+                (<Modal
                     message="Delete this message. This cannot be undone."
-                    isMessageModal={false}
-                    isDeleteWarning={true}
-                    isJoinMeetingModal={false}
-                    isCreateMeetingModal={false}
+                    isDeleteMessageModal={true}
                     setShowModal={setShowWarningModal}
                 />
             )}

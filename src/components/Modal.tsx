@@ -4,16 +4,18 @@ import { Trash2 } from "lucide-react";
 
 type props = {
     message: string,
-    isMessageModal: boolean,
-    isDeleteWarning: boolean,
-    isJoinMeetingModal: boolean,
-    isCreateMeetingModal: boolean
+    isMessageModal?: boolean,
+    isDeleteMessageModal?: boolean,
+    isRemoveAccountModal?: boolean,
+    handleAccountRemoval?: () => Promise<void>,
+    isJoinMeetingModal?: boolean,
+    isCreateMeetingModal?: boolean
     setShowModal: React.Dispatch<
-    React.SetStateAction<boolean>
-  >;
+        React.SetStateAction<boolean>
+    >;
 }
 
-export default function WarningModal({message, isMessageModal, isDeleteWarning, isJoinMeetingModal, isCreateMeetingModal, setShowModal}: props){
+export default function Modal({message, isMessageModal, isDeleteMessageModal, isRemoveAccountModal, handleAccountRemoval, isJoinMeetingModal, isCreateMeetingModal, setShowModal}: props){
     const [inputText, setinputText] = useState(localStorage.getItem("inputText") || "");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,10 +27,10 @@ export default function WarningModal({message, isMessageModal, isDeleteWarning, 
     };
 
     function joinMeeting(){
-
     }
     function createMeeting(){
-
+    }
+    function deleteMessage(){
     }
 
     return(
@@ -58,19 +60,23 @@ export default function WarningModal({message, isMessageModal, isDeleteWarning, 
                             Close
                         </button>
 
+                        {isMessageModal?'':''}
+
                         {
-                            isMessageModal || isCreateMeetingModal || isJoinMeetingModal?''
-                            :isDeleteWarning
-                            ?<button className="flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-gray-300">
-                                <Trash2 size={16} />
-                                Delete
-                            </button>
-                            :<button className="flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-gray-300">
-                                Continue
+                            (isDeleteMessageModal || isRemoveAccountModal) &&
+                            <button
+                                className="flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-gray-300"
+                                onClick={() => {
+                                    if (isDeleteMessageModal) deleteMessage()
+                                        else handleAccountRemoval?.();
+                                }}
+                            >
+                                {isDeleteMessageModal?"Delete":"Continue"}
                             </button>
                         }
 
-                        {(isJoinMeetingModal || isCreateMeetingModal) &&
+                        {
+                            (isJoinMeetingModal || isCreateMeetingModal) &&
                             <button
                                 className="px-4 py-2 text-bgforeground rounded-[15px] bg-bgtext cursor-pointer"
                                 onClick={() => {
