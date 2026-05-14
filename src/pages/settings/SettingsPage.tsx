@@ -42,9 +42,6 @@ export default function SettingsPage({userInfo, setUserInfo}: props){
     const [ showDeleteModal, setShowDeleteModal ] = useState(false);
     const [ showFailedAccRemovalMessageModal, setShowFailedAccRemovalMessageModal ] = useState(false);
 
-    let dateJoined: string;
-    if(userInfo) dateJoined = getDateJoined(userInfo.createdAt)
-
     async function handleAccountRemoval(){
         setIsLoading(true)
         try{
@@ -73,7 +70,7 @@ export default function SettingsPage({userInfo, setUserInfo}: props){
 
                             <div className="flex flex-col">
                                 <span className="font-bold text-[2rem] truncate  lg:text-[2.5rem]">{userInfo.name}</span>
-                                <span className="text-gray-500 text-sm">Joined <span>{dateJoined}</span></span>
+                                <span className="text-gray-500 text-sm">Joined <span>{getDateJoined(userInfo.createdAt)}</span></span>
                             </div>
                         </div>
 

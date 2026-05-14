@@ -9,7 +9,7 @@ import PersonalStudyPage from './pages/PersonalStudyPage';
 import GroupCollaborationPage from './pages/groupCollaboration/GroupCollaborationPage';
 import ActiveCollaborationsPage from './pages/groupCollaboration/ActiveCollaborationPage';
 import SettingsPage from './pages/settings/SettingsPage';
-// import AnalyticsPage from './pages/settings/AnalyticsPage';
+import AnalyticsPage from './pages/settings/AnalyticsPage';
 import SignUpPage from './pages/auth/SignUpPage';
 
 
@@ -96,7 +96,7 @@ function App() {
                 <Route path="/groupcollaboration" element={<GroupCollaborationPage userInfo={userInfo} groupCollaborationPageTitle={groupCollaborationPageTitle} />} />
                 <Route path="/activecollaborations" element={<ActiveCollaborationsPage userInfo={userInfo} setGroupCollaborationPageTitle={setGroupCollaborationPageTitle} activeSessions={activeSessions} />} />
                 <Route path="/settings" element={<SettingsPage userInfo={userInfo} setUserInfo={setUserInfo} />} />
-                {/* <Route path="/analytics" element={<AnalyticsPage userInfo={userInfo} />} /> */}
+                <Route path="/analytics" element={<AnalyticsPage userInfo={userInfo} />} />
             </Routes>
         </AnimatePresence>
     </>

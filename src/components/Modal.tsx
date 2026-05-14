@@ -71,6 +71,7 @@ export default function Modal({message, isMessageModal, isDeleteMessageModal, is
                                         else handleAccountRemoval?.();
                                 }}
                             >
+                                <Trash2 size={20} className="text-bgtext" />
                                 {isDeleteMessageModal?"Delete":"Continue"}
                             </button>
                         }

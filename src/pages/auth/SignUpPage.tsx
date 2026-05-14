@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import Navbar from "../../components/Navbar"
 import Modal from "../../components/Modal";
-import { useAuth } from "../../hooks/useAuth";
 import type { DocumentData } from "firebase/firestore";
 import LoadingScreen from "../../components/LoadingScreen";
 
