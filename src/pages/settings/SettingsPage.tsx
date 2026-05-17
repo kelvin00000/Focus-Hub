@@ -50,7 +50,7 @@ export default function SettingsPage({userInfo, setUserInfo}: props){
         }
         catch(err){
             console.error(err);
-            setIsLoading(true)
+            setIsLoading(false)
             setShowFailedAccRemovalMessageModal(true);
         }
     }
@@ -63,13 +63,14 @@ export default function SettingsPage({userInfo, setUserInfo}: props){
             <Navbar userInfo={userInfo} title={"Settings"} showTitle={true} showProfileIcon={false} showMenuButton={true} />
 
             {userInfo&&
-                    <section className="flex flex-col pb-[10px] items-center justify-center gap-[20px] w-full h-dvh text-bgtext bg-bgdark overflow-y-scroll no-scrollbar lg:flex-row lg:gap-[50px] lg:pt-[0px] lg:pb-[0px]">
-                    <div className="flex flex-col gap-[20px] mt-[50%] lg:mt-0 p-6.5 w-[95%] lg:h-[75%] bg-bgforeground rounded-[20px]  lg:w-[40%]">
-                        <div className="flex items-center gap-5 mb-[10%]">
+                <section className="flex flex-col pb-[10px] items-center justify-center gap-[20px] w-full h-dvh text-bgtext bg-bgdark overflow-y-scroll no-scrollbar lg:flex-row lg:gap-[50px] lg:pt-[0px] lg:pb-[0px]">
+
+                    <div className="flex flex-col gap-[20px] mt-[50%] lg:mt-0 p-6.5 w-[95%] lg:h-[70%] bg-bgforeground rounded-[20px]  lg:w-[40%]">
+                        <div className="flex items-center gap-5 mb-[5%]">
                             <img className="w-[100px] h-[100px] rounded-full" src={userInfo.profileImage} />
 
                             <div className="flex flex-col">
-                                <span className="font-bold text-[2rem] truncate  lg:text-[2.5rem]">{userInfo.name}</span>
+                                <span className="w-[85%] font-bold text-[1.8rem] truncate  lg:text-[2rem]">{userInfo.name}</span>
                                 <span className="text-gray-500 text-sm">Joined <span>{getDateJoined(userInfo.createdAt)}</span></span>
                             </div>
                         </div>
@@ -94,7 +95,7 @@ export default function SettingsPage({userInfo, setUserInfo}: props){
                         </Link>
                     </div>
 
-                    <div className="flex flex-col gap-[20px] p-6.5 w-[95%] lg:h-[75%] bg-bgforeground  rounded-[20px]  lg:w-[40%]">
+                    <div className="flex flex-col gap-[20px] p-6.5 w-[95%] lg:w-[40%] lg:h-[70%] bg-bgforeground  rounded-[20px]">
                         <div
                             className="flex items-center justify-between px-8 py-6 w-full bg-[#0A1A2F] rounded-[20px] cursor-pointer"
                             onClick={() => { setShowMessageModal(true) }}
@@ -116,7 +117,7 @@ export default function SettingsPage({userInfo, setUserInfo}: props){
                         </Link>
 
                         <button
-                            className="flex items center justify-between mt-[20%] py-3.5 px-5.5 w-full text-red-500 rounded-[20px] border border-gray-800 cursor-pointer  lg:w-[60%]"
+                            className="flex items center justify-between mt-[15%] py-3.5 px-5.5 w-full text-red-500 rounded-[20px] border border-gray-800 cursor-pointer  lg:w-[60%]"
                             onClick={() => { setShowDeleteModal(true) }}
                         >
                             Deactivate your account

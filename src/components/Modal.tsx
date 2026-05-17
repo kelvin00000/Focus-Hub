@@ -35,7 +35,7 @@ export default function Modal({message, isMessageModal, isDeleteMessageModal, is
 
     return(
         <>
-           <div className="fixed inset-0 z-100 flex items-center justify-center backdrop-blur-sm">
+           <div className="fixed inset-0 z-9999 flex items-center justify-center backdrop-blur-sm">
                 <div className="w-[300px] rounded-3xl border border-[#0A1A2F] bg-bgforeground p-4 shadow-2xl">
                     <div className="mt-1 rounded-2xl border border-[#0A1A2F] bg-[#0A1A2F] p-4">
                         <p className="mb-8 text-[15px] text-[#F5F5F5] text-center">
