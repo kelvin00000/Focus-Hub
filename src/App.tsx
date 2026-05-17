@@ -90,7 +90,7 @@ function App() {
     <>
         <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
-                <Route path={userInfo?"/signup":"/"} element={<SignUpPage userInfo={userInfo} />} />
+                <Route path={userInfo?"/signup":"/"} element={<SignUpPage />} />
                 <Route path={userInfo?"/":"/navigate"} element={<MainMenuPage userInfo={userInfo} />} />
                 <Route path="/personalstudy" element={<PersonalStudyPage userInfo={userInfo} />} />
                 <Route path="/groupcollaboration" element={<GroupCollaborationPage userInfo={userInfo} groupCollaborationPageTitle={groupCollaborationPageTitle} />} />
