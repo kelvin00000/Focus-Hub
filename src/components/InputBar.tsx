@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useStudyMode } from "../hooks/useStudyMode";
 import Modal from "./Modal";
 import { sendGoogleSearchQuery } from "../services/googleSearchBackend";
-import { sendAIDocQuery, sendAISearchQuery } from "../services/geminiSearch";
+// import { sendAIDocQuery, sendAISearchQuery } from "../services/geminiSearch";
 
 
 // type props = {
@@ -49,11 +49,11 @@ export default function InputBar(){
             return;
         }
         if(searchMethod==='google') sendGoogleSearchQuery(inputText, personalStudyMode)
-            else if(searchMethod==='ai') sendAISearchQuery(inputText, personalStudyMode);
+            // else if(searchMethod==='ai') sendAISearchQuery(inputText, personalStudyMode);
     }
     const handleDocUpload = ()=>{
-        const file = docUploadInputRef.current?.files?.[0];
-        sendAIDocQuery(file, personalStudyMode)
+        // const file = docUploadInputRef.current?.files?.[0];
+        // sendAIDocQuery(file, personalStudyMode)
     }
 
     return(

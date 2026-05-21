@@ -28,9 +28,10 @@ export async function sendAISearchQuery(query: string, personalStudyMode: boolea
 
 
 
-export async function sendAIDocQuery(doc: File|undefined, personalStudyMode: boolean){
-    return personalStudyMode;
-}
+// export async function sendAIDocQuery(doc: File|undefined, personalStudyMode: boolean){
+//     const y = doc;
+//     return personalStudyMode;
+// }
 
 
 // "https://www.googleapis.com/customsearch/v1?key=AIzaSyDoRWFZojCsoopx4Y6vNxurb2IwB37Vmto&cx=95e4d89cdb1164138&q=test"

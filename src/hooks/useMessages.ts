@@ -1,4 +1,4 @@
-import { collection, doc, onSnapshot, query, orderBy, getDocs, type DocumentData } from "firebase/firestore"
+import { collection, onSnapshot, query, orderBy, getDocs, type DocumentData } from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { db, user } from "../services/authentication";
 import type { MessageType } from "../types/messageTypes";
