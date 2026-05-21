@@ -1,4 +1,3 @@
-import { type DocumentData } from "firebase/firestore";
 import { removeAccount } from "../../services/authentication";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -7,7 +6,7 @@ import Modal from "../../components/Modal";
 import { SunIcon, Users, LockIcon, LayoutDashboardIcon, Trash2 } from "lucide-react"
 import { useAuth } from "../../hooks/useAuth";
 import LoadingScreen from "../../components/LoadingScreen";
-
+import { useUserContext } from "../../hooks/useUserContext";
 
 function getDateJoined(timestamp: {
   seconds: number;
@@ -30,13 +29,14 @@ function getDateJoined(timestamp: {
     return `${day}${suffix} ${month} ${year}`;
 }
 
-type props = {
-    userInfo: DocumentData|null|undefined
-    setUserInfo: React.Dispatch<React.SetStateAction<DocumentData|null>>,
-}
+// type props = {
+//      userInfo: DocumentData|null|undefined
+//      setUserInfo: React.Dispatch<React.SetStateAction<DocumentData|null>>,
+// }
 
-export default function SettingsPage({userInfo, setUserInfo}: props){
+export default function SettingsPage(){
     useAuth();
+    const { userInfo } = useUserContext();
     const [isLoading, setIsLoading] = useState(false)
     const [ showMessageModal, setShowMessageModal ] = useState(false);
     const [ showDeleteModal, setShowDeleteModal ] = useState(false);
@@ -46,7 +46,7 @@ export default function SettingsPage({userInfo, setUserInfo}: props){
         setIsLoading(true)
         try{
             await removeAccount()
-            setUserInfo(null);
+            // setUserInfo(null);
         }
         catch(err){
             console.error(err);
@@ -60,7 +60,7 @@ export default function SettingsPage({userInfo, setUserInfo}: props){
 
             <title>Settings</title>
 
-            <Navbar userInfo={userInfo} title={"Settings"} showTitle={true} showProfileIcon={false} showMenuButton={true} />
+            <Navbar title={"Settings"} showTitle={true} showProfileIcon={false} showMenuButton={true} />
 
             {userInfo&&
                 <section className="flex flex-col pb-[10px] items-center justify-center gap-[20px] w-full h-dvh text-bgtext bg-bgdark overflow-y-scroll no-scrollbar lg:flex-row lg:gap-[50px] lg:pt-[0px] lg:pb-[0px]">
@@ -113,7 +113,6 @@ export default function SettingsPage({userInfo, setUserInfo}: props){
                             <span className="mb-[10px] text-[15px]">Track productivity, study consistency and session performance.</span>
 
                             <span className="text-gray-500 text-sm">Click to open</span>
-
                         </Link>
 
                         <button

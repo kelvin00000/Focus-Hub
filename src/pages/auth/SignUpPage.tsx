@@ -1,10 +1,10 @@
-import { signUpWithGoogle, auth } from "../../services/authentication";
-import { onAuthStateChanged } from "firebase/auth";
+import { signUpWithGoogle } from "../../services/authentication";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import Modal from "../../components/Modal";
 import LoadingScreen from "../../components/LoadingScreen";
+import { useUserContext } from "../../hooks/useUserContext";
 
 
 // type props = {
@@ -12,19 +12,17 @@ import LoadingScreen from "../../components/LoadingScreen";
 // }
 
 export default function SignUpPage(){
+    const { user } = useUserContext();
     const [isLoading, setIsLoading] = useState(false)
     const [showMessageModal, setShowMessageModal] = useState(false);
 
     const navigate = useNavigate();
     useEffect(() => {
-        const userCheck = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setIsLoading(false);
-                navigate('/');
-            }
-        });
-        return userCheck;
-    }, [navigate]);
+        if (user) {
+            // setIsLoading(false);
+            navigate('/');
+        }
+    }, [user, navigate]);
 
     async function handleSignUp(){
         setIsLoading(true);

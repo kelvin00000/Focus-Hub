@@ -4,10 +4,10 @@ import Navbar from "../../components/Navbar"
 import { Users, CopyIcon, UserCog } from "lucide-react"
 import Modal from "../../components/Modal"
 import { useAuth } from "../../hooks/useAuth"
-import type { DocumentData } from "firebase/firestore"
+import { useStudyMode } from "../../hooks/useStudyMode"
+
 
 type props = {
-    userInfo: DocumentData|null|undefined
     setGroupCollaborationPageTitle: React.Dispatch<React.SetStateAction<string>>,
     activeSessions: {
         meetingName: string,
@@ -20,16 +20,18 @@ type props = {
     }[]
 }
 
-export default function ActiveCollaborationsPage({ userInfo,  setGroupCollaborationPageTitle, activeSessions }: props){
+export default function ActiveCollaborationsPage({ setGroupCollaborationPageTitle, activeSessions }: props){
     useAuth();
+    const { setPersonalStudyMode } = useStudyMode();
     const [showJoinMeetingModal, setShowJoinMeetingModal] = useState(false);
     const [showCreateMeetingModal, setShowCreateMeetingModal] = useState(false);
+
 
     return(
         <>
             <title>Active Sessions</title>
 
-            <Navbar userInfo={userInfo} title={"Active Sessions"} showTitle={true} showProfileIcon={true} showMenuButton={true} />
+            <Navbar title={"Active Sessions"} showTitle={true} showProfileIcon={true} showMenuButton={true} />
 
             <section className="w-full h-screen text-bgtext bg-bgdark">
                 <div className="grid grid-cols-1 lg:grid-cols-3 place-items-center gap-5 pt-25 pb-[120px] w-full min-h-screen h-dvh overflow-y-scroll no-scrollbar [&>*]:w-[90%] lg:[&>*]:w-[350px] lg:gap-0">
@@ -70,7 +72,10 @@ export default function ActiveCollaborationsPage({ userInfo,  setGroupCollaborat
 
                                     <Link to="/groupcollaboration"
                                         className="py-3 px-5.5 text-bgforeground rounded-[15px] bg-bgtext cursor-pointer"
-                                        onClick={() => { setGroupCollaborationPageTitle(`${session.meetingName}`) }}
+                                        onClick={() => {
+                                            setGroupCollaborationPageTitle(`${session.meetingName}`)
+                                            setPersonalStudyMode(false)
+                                        }}
                                     >
                                         Open Group
                                     </Link>

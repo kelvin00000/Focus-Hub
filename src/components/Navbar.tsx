@@ -1,6 +1,6 @@
-import { type DocumentData } from "firebase/firestore";
 import { Link } from "react-router";
 import { Menu } from "lucide-react"
+import { useUserContext } from "../hooks/useUserContext";
 
 
 type props = {
@@ -8,9 +8,11 @@ type props = {
     showTitle: boolean,
     showProfileIcon: boolean,
     showMenuButton: boolean,
-    userInfo: DocumentData|null|undefined
 }
-export default function Navbar({title, showTitle, showProfileIcon, showMenuButton, userInfo}:props){
+export default function Navbar({ title, showTitle, showProfileIcon, showMenuButton }:props){
+    const { userInfo } = useUserContext();
+
+
     return(
         <>
             {userInfo&&

@@ -2,23 +2,40 @@ import Navbar from "../components/Navbar";
 import WorkArea from "../components/WorkArea";
 import InputBar from "../components/InputBar";
 import { useAuth } from "../hooks/useAuth";
-import type { DocumentData } from "firebase/firestore";
+import { useState, useEffect } from "react";
+import { fetchChatMessages } from "../services/firestore";
+import type { chatMessagesType } from "../types/messageTypes";
 
-type props = {
-    userInfo: DocumentData|null|undefined
-}
+// type props = {
+//
+// }
+const personalStudyMode = true;
+const messages = await fetchChatMessages(personalStudyMode)
 
-export default function PersonalStudyPage({userInfo}: props){
+export default function PersonalStudyPage(){
     useAuth();
+    const [ chatMessages, setChatMessages ] = useState<chatMessagesType>([]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if(!messages) return;
+            setChatMessages(messages)
+            // console.log(chatMessages)
+        }, 500);
+        return () => {
+            clearInterval(interval)
+        };
+    }, [chatMessages]);
+
     return(
         <>
             <title>Personal Study</title>
 
-            <Navbar userInfo={userInfo} title={"Personal"} showTitle={true} showProfileIcon={true} showMenuButton={true} />
+            <Navbar title={"Personal"} showTitle={true} showProfileIcon={true} showMenuButton={true} />
 
             <section className="flex items-center justify-center w-full h-screen bg-bgdark overflow-hidden">
-                <WorkArea />
-                <InputBar showShareFileButtton={true} />
+                <WorkArea chatMessages={chatMessages} />
+                <InputBar />
             </section>
         </>
     )

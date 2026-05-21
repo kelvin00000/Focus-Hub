@@ -1,20 +1,19 @@
 import { useState } from "react";
 import { Users } from "lucide-react"
 import Navbar from "../../components/Navbar";
-import WorkArea from "../../components/WorkArea";
-import InputBar from "../../components/InputBar";
+// import WorkArea from "../../components/WorkArea";
+// import InputBar from "../../components/InputBar";
 import ActiveMembersModal from "./ActiveMembersModal";
 import { useAuth } from "../../hooks/useAuth";
-import type { DocumentData } from "firebase/firestore";
+
 
 // FETCH CURRENT GROUP INFO HERE AND PASS TO MODAL
 
 type props = {
-    userInfo: DocumentData|null|undefined
     groupCollaborationPageTitle: string
 }
 
-export default function GroupCollaborationPage({userInfo, groupCollaborationPageTitle}: props){
+export default function GroupCollaborationPage({ groupCollaborationPageTitle }: props){
     useAuth();
     const [showMembersModal, setShowMembersModal] = useState(false);
     const [ activeSession ] = useState({
@@ -45,7 +44,7 @@ export default function GroupCollaborationPage({userInfo, groupCollaborationPage
         <>
             <title>Group</title>
 
-            <Navbar userInfo={userInfo} title={groupCollaborationPageTitle} showTitle={true} showProfileIcon={true} showMenuButton={true} />
+            <Navbar title={groupCollaborationPageTitle} showTitle={true} showProfileIcon={true} showMenuButton={true} />
 
             <button
                 className="fixed top-[8%] right-[5%] lg:top-[12%] lg:right-[3%] p-4 bg-[#0A1A2F] border border-gray-500 rounded-full cursor-pointer z-40"
@@ -55,8 +54,8 @@ export default function GroupCollaborationPage({userInfo, groupCollaborationPage
             </button>
 
             <section className="flex items-center justify-center w-full h-screen bg-bgdark">
-                <WorkArea />
-                <InputBar showShareFileButtton={true} />
+                {/* <WorkArea /> */}
+                {/* <InputBar /> */}
             </section>
 
             {showMembersModal && (

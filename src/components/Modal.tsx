@@ -8,6 +8,7 @@ type props = {
     isDeleteMessageModal?: boolean,
     isRemoveAccountModal?: boolean,
     handleAccountRemoval?: () => Promise<void>,
+    handleMessageDelete?: () => void,
     isJoinMeetingModal?: boolean,
     isCreateMeetingModal?: boolean
     setShowModal: React.Dispatch<
@@ -15,7 +16,7 @@ type props = {
     >;
 }
 
-export default function Modal({message, isMessageModal, isDeleteMessageModal, isRemoveAccountModal, handleAccountRemoval, isJoinMeetingModal, isCreateMeetingModal, setShowModal}: props){
+export default function Modal({message, isMessageModal, isDeleteMessageModal, isRemoveAccountModal, handleAccountRemoval, handleMessageDelete, isJoinMeetingModal, isCreateMeetingModal, setShowModal}: props){
     const [inputText, setinputText] = useState(localStorage.getItem("inputText") || "");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,8 +30,6 @@ export default function Modal({message, isMessageModal, isDeleteMessageModal, is
     function joinMeeting(){
     }
     function createMeeting(){
-    }
-    function deleteMessage(){
     }
 
     return(
@@ -67,7 +66,7 @@ export default function Modal({message, isMessageModal, isDeleteMessageModal, is
                             <button
                                 className="flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-gray-300"
                                 onClick={() => {
-                                    if (isDeleteMessageModal) deleteMessage()
+                                    if (isDeleteMessageModal) handleMessageDelete?.()
                                         else handleAccountRemoval?.();
                                 }}
                             >

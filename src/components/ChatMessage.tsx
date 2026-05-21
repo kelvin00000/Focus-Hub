@@ -5,6 +5,11 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import Modal from "./Modal";
 import { BotIcon, DownloadIcon } from "lucide-react";
 import { FcGoogle } from "react-icons/fc"
+import { formatMessageTime } from "../utils/formatMessageTime";
+import { user } from "../services/authentication";
+import type { MessageType } from "../types/messageTypes";
+import { deleteMessage } from "../services/firestore";
+import { useStudyMode } from "../hooks/useStudyMode";
 
 pdfjs.GlobalWorkerOptions.workerSrc =
   new URL(
@@ -12,25 +17,16 @@ pdfjs.GlobalWorkerOptions.workerSrc =
     import.meta.url
   ).toString();
 
-// CHANGE TIME TYPE TO NUMBER WHEN USING FIRESTORE TIMESTAMPS
-type props = {
-    sender: string,
-    profileImage?: string,
-    searchMethod?: string,
-    query?: string,
-    message?: string,
-    previewUrl?: string,
-    originalUrl?: string,
-    tag: string,
-    time: string,
-    isUser: boolean
-}
 
 
-export default function ChatMessage({sender, profileImage, searchMethod, query, message, previewUrl, originalUrl, tag, time, isUser}: props){
+
+export default function ChatMessage({id, userId, sender, profileImage, searchMethod, query, response, message, previewUrl, originalUrl, tag, createdAt}: MessageType){
+    const { personalStudyMode } = useStudyMode()
     const [showWarningModal, setShowWarningModal] = useState(false);
+     const [showDeleteErrorModal, setShowDeleteErrorModal] = useState(false);
     const timerRef = useRef<number | null>(null);
     const [text, setText] = useState("");
+    const messageCard = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         fetch(`${previewUrl}`)
@@ -49,12 +45,28 @@ export default function ChatMessage({sender, profileImage, searchMethod, query, 
         }
     };
 
+    const handleMessageDelete = () => {
+        try{
+            const messageId = messageCard.current?.dataset.messageId;
+            console.log(messageId)
+            deleteMessage(personalStudyMode, messageId!)
+        }
+        catch(err){
+            console.error(err)
+            setShowDeleteErrorModal(true);
+        }
+    }
+
+    // TIME FORMAT
+    const timeCreated = formatMessageTime(createdAt);
 
     return(
         <>
-            <div className={`flex ${isUser?'justify-end':'justify-start'} w-full`}>
-                <img className={`${isUser?'hidden':'mr-[5px] w-[30px] h-[30px] rounded-full'}`} src={profileImage} />
+            <div className={`flex ${userId===user?.uid?'justify-end':'justify-start'} w-full`}>
+                <img className={`${userId===user?.uid?'hidden':'mr-[5px] w-[30px] h-[30px] rounded-full'}`} src={profileImage} />
                 <div
+                    data-message-id={id}
+                    ref={messageCard}
                     onMouseDown={handleHoldStart}
                     onMouseUp={handleHoldEnd}
                     onMouseLeave={handleHoldEnd}
@@ -62,7 +74,7 @@ export default function ChatMessage({sender, profileImage, searchMethod, query, 
                     onTouchEnd={handleHoldEnd}
                     className="flex flex-col shrink-0 gap-10px p-[15px] max-w-[82%] text-[#F5F5F5] bg-bgforeground rounded-[20px] border border-gray-800 lg:max-w-[65%]">
                     <div className="mb-[10px] font-light italic">{
-                        isUser?''
+                        userId===user?.uid?''
                         : searchMethod==='AI Search'? (
                             <div className="flex items-center gap-2.5">
                                 <BotIcon size={18} color="#F5F5F5" />
@@ -82,6 +94,7 @@ export default function ChatMessage({sender, profileImage, searchMethod, query, 
                             <span className="mb-[3px] text-[12px] italic">Query</span>
                             <div className="mb-[15px]">{query}</div>
                             <span className="mb-[3px] text-[12px] italic">Response</span>
+                            <div className="mb-[15px]">{response}</div>
                         </>
                     : ''
                     }
@@ -124,7 +137,7 @@ export default function ChatMessage({sender, profileImage, searchMethod, query, 
                                 </button>
                                 :''
                             }
-                            <span className="text-[13px]">{time}</span>
+                            <span className="text-[13px]">{timeCreated}</span>
                         </div>
                     </div>
                 </div>
@@ -134,7 +147,16 @@ export default function ChatMessage({sender, profileImage, searchMethod, query, 
                 (<Modal
                     message="Delete this message. This cannot be undone."
                     isDeleteMessageModal={true}
+                    handleMessageDelete={handleMessageDelete}
                     setShowModal={setShowWarningModal}
+                />
+            )}
+
+            {showDeleteErrorModal &&
+                (<Modal
+                    message="Delete was unsuccessful. Please try again."
+                    isMessageModal={true}
+                    setShowModal={setShowDeleteErrorModal}
                 />
             )}
         </>

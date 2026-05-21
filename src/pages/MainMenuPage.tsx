@@ -1,5 +1,4 @@
 import { onAuthStateChanged } from "firebase/auth";
-import { type DocumentData } from "firebase/firestore";
 import { auth } from "../services/authentication";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
@@ -7,14 +6,14 @@ import Navbar from "../components/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { BookOpen, Zap, Users, Settings } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { useStudyMode } from "../hooks/useStudyMode";
 
-type props = {
-    userInfo: DocumentData|null|undefined
-}
 
-export default function MainMenuPage({userInfo}: props){
+
+export default function MainMenuPage(){
     useAuth();
     const navigate = useNavigate();
+    const { setPersonalStudyMode } = useStudyMode();
 
     useEffect(() => {
         const userCheck = onAuthStateChanged(auth, (user) => {
@@ -35,11 +34,14 @@ export default function MainMenuPage({userInfo}: props){
             <>
                 <title>Menu</title>
 
-                <Navbar userInfo={userInfo} title={"Navigate"} showTitle={true} showProfileIcon={true} showMenuButton={false} />
+                <Navbar title={"Navigate"} showTitle={true} showProfileIcon={true} showMenuButton={false} />
 
                 <section className="min-h-screen flex items-center justify-start w-full h-screen bg-bgdark">
                     <div className="ml-[5%] flex flex-col gap-1 w-full">
-                        <Link to="/personalstudy" className="flex items-center justify-between w-[280px] rounded-full border border-gray-800 bg-bgforeground px-8 py-7">
+                        <Link to="/personalstudy"
+                            className="flex items-center justify-between w-[280px] rounded-full border border-gray-800 bg-bgforeground px-8 py-7"
+                            onClick={()=>{ setPersonalStudyMode(true) }}
+                        >
                             <span className="text-[20px] font-bold text-bgtext">Personal Study</span>
                             <BookOpen size={20} className="text-bgtext" />
                         </Link>

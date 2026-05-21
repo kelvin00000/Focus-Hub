@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, deleteUser, reauthenticateWithPopup } from "firebase/auth";
-import type { User } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, deleteUser, reauthenticateWithPopup, type User } from "firebase/auth";
 import { getFirestore, setDoc, doc, deleteDoc } from "firebase/firestore";
+import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBAGQL-87Hyzge6gOfEGO5BJddQUAaeXJk",
@@ -17,9 +17,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let user: User | null;
 
-export const auth = getAuth(app);
+const auth = getAuth(app);
 auth.languageCode = 'en';
 const provider = new GoogleAuthProvider();
+const functions = getFunctions(app, 'us-central1');
 
 
 //// SIGN-UP FUNCTION
@@ -41,13 +42,12 @@ export async function signUpWithGoogle(){
 
 //// REMOVE ACCOUNT FUNCTION
 export async function removeAccount(){
-    // const uid = user?.uid;
-
     if (user) {
         await reauthenticateWithPopup(user, provider);
 
         await Promise.all([
             deleteDoc(doc(db, 'users', user.uid)),
+            deleteDoc(doc(db, 'personalChat', user.uid, 'chat'))
         ]);
 
         deleteUser(user);
@@ -58,4 +58,4 @@ export async function removeAccount(){
 onAuthStateChanged(auth, (currentUser)=>{
     user = currentUser;
 })
-export { db, user };
+export { db, user, auth, functions };
