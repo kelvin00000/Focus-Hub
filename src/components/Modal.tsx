@@ -8,7 +8,7 @@ type props = {
     isDeleteMessageModal?: boolean,
     isRemoveAccountModal?: boolean,
     handleAccountRemoval?: () => Promise<void>,
-    handleMessageDelete?: () => void,
+    handleMessageDelete?: () => Promise<void>
     isJoinMeetingModal?: boolean,
     isCreateMeetingModal?: boolean
     setShowModal: React.Dispatch<

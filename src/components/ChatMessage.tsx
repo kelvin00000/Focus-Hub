@@ -7,23 +7,37 @@ import { BotIcon, DownloadIcon } from "lucide-react";
 import { FcGoogle } from "react-icons/fc"
 import { formatMessageTime } from "../utils/formatMessageTime";
 import { user } from "../services/authentication";
-import type { MessageType } from "../types/messageTypes";
-import { deleteMessage } from "../services/firestore";
+import type { chatMessagesType } from "../types/messageTypes";
+import type { Timestamp } from "firebase/firestore";
+import { deleteMessage, fetchChatMessages } from "../services/firestore";
 import { useStudyMode } from "../hooks/useStudyMode";
 
 pdfjs.GlobalWorkerOptions.workerSrc =
-  new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url
-  ).toString();
+  new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+
+
+type props = {
+    id: string
+    userId: string
+    sender: string
+    profileImage?: string
+    message?: string
+    query?: string
+    response?: string
+    previewUrl?: string
+    originalUrl?: string
+    searchMethod?: string,
+    tag: string
+    createdAt: Timestamp
+    setChatMessages: React.Dispatch<React.SetStateAction<chatMessagesType>>
+}
 
 
 
-
-export default function ChatMessage({id, userId, sender, profileImage, searchMethod, query, response, message, previewUrl, originalUrl, tag, createdAt}: MessageType){
-    const { personalStudyMode } = useStudyMode()
-    const [showWarningModal, setShowWarningModal] = useState(false);
-     const [showDeleteErrorModal, setShowDeleteErrorModal] = useState(false);
+export default function ChatMessage({id, userId, sender, profileImage, searchMethod, query, response, message, previewUrl, originalUrl, tag, createdAt, setChatMessages}: props){
+    const { personalStudyMode } = useStudyMode();
+    const [ showWarningModal, setShowWarningModal ] = useState(false);
+    const [ showDeleteErrorModal, setShowDeleteErrorModal ] = useState(false);
     const timerRef = useRef<number | null>(null);
     const [text, setText] = useState("");
     const messageCard = useRef<HTMLDivElement>(null);
@@ -37,7 +51,7 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
     const handleHoldStart = () => {
         timerRef.current = setTimeout(() => {
             setShowWarningModal(true);
-        }, 1000);
+        }, 3000);
     };
     const handleHoldEnd = () => {
         if (timerRef.current) {
@@ -45,17 +59,22 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
         }
     };
 
-    const handleMessageDelete = () => {
+    const handleMessageDelete = async () => {
         try{
             const messageId = messageCard.current?.dataset.messageId;
-            console.log(messageId)
-            deleteMessage(personalStudyMode, messageId!)
+            await deleteMessage(personalStudyMode, messageId!)
+            const messages = await fetchChatMessages(personalStudyMode)
+            if(!messages) return;
+            setChatMessages(messages);
+            return
         }
         catch(err){
             console.error(err)
             setShowDeleteErrorModal(true);
+            return;
         }
     }
+
 
     // TIME FORMAT
     const timeCreated = formatMessageTime(createdAt);
@@ -72,7 +91,7 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
                     onMouseLeave={handleHoldEnd}
                     onTouchStart={handleHoldStart}
                     onTouchEnd={handleHoldEnd}
-                    className="flex flex-col shrink-0 gap-10px p-[15px] max-w-[82%] text-[#F5F5F5] bg-bgforeground rounded-[20px] border border-gray-800 lg:max-w-[65%]">
+                    className="flex flex-col shrink-0 gap-10px p-[15px] max-w-[82%] min-w-[60%] lg:min-w-[40%] text-[#F5F5F5] bg-bgforeground rounded-[20px] border border-gray-800 lg:max-w-[65%]">
                     <div className="mb-[10px] font-light italic">{
                         userId===user?.uid?''
                         : searchMethod==='AI Search'? (
@@ -92,7 +111,7 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
                     {query?
                         <>
                             <span className="mb-[3px] text-[12px] italic">Query</span>
-                            <div className="mb-[15px]">{query}</div>
+                            <div className="mb-[15px] line-clamp-3">{query}</div>
                             <span className="mb-[3px] text-[12px] italic">Response</span>
                             <div className="mb-[15px]">{response}</div>
                         </>

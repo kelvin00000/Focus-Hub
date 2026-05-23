@@ -1,4 +1,4 @@
-import { saveUserMessage, saveSearchResponse } from "./firestore";
+import { saveSearchResponse } from "./firestore";
 // import { httpsCallable } from 'firebase/functions';
 // import { functions } from "./authentication";
 // import { type HttpsCallableResult } from "firebase/functions";
@@ -6,26 +6,35 @@ import { saveUserMessage, saveSearchResponse } from "./firestore";
 
 // const googleSearch = httpsCallable(functions, "braveSearch");
 
+
 export async function sendGoogleSearchQuery(query: string, personalStudyMode: boolean){
     if(!query) return;
     const isGoogleSearch = true;
-    await saveUserMessage(query, personalStudyMode);
+    // await saveUserMessage(query, personalStudyMode);
 
     async function googleSearch(query: string){
-        const response = await fetch(
-            `https://corsproxy.io/?${encodeURIComponent('https://api.search.brave.com/res/v1/web/search?q=' + query)}`,
-            { headers: { 'X-Subscription-Token': 'BSA2CKyFHsqnrWlcfFRRNqg-ad6gltc' } }
-        );
-        return await response.json();
+        try{
+            const response = await fetch(
+                `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`
+            );
+            const data = await response.json();
+            return data;
+        }
+        catch(err){
+            console.error(err);
+        }
     }
 
     const rawResponse = await googleSearch(query);
-    console.log(rawResponse);
+    // console.log(rawResponse);
 
-    const response = rawResponse.web.results[1].description;
-    const searcQuery = rawResponse.query.original;
+    const response = rawResponse.Abstract;
+    // console.log(response);
 
-    await saveSearchResponse(searcQuery, response, personalStudyMode, isGoogleSearch)
+    if(!response){
+        throw new Error;
+    }
+    await saveSearchResponse(query, response, personalStudyMode, isGoogleSearch)
 }
 
 

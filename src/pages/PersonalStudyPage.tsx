@@ -2,30 +2,42 @@ import Navbar from "../components/Navbar";
 import WorkArea from "../components/WorkArea";
 import InputBar from "../components/InputBar";
 import { useAuth } from "../hooks/useAuth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { fetchChatMessages } from "../services/firestore";
 import type { chatMessagesType } from "../types/messageTypes";
+import { useStudyMode } from "../hooks/useStudyMode";
+import LoadingScreen from "../components/LoadingScreen";
 
 // type props = {
 //
 // }
-const personalStudyMode = true;
-const messages = await fetchChatMessages(personalStudyMode)
 
 export default function PersonalStudyPage(){
     useAuth();
+    const { personalStudyMode } = useStudyMode()
     const [ chatMessages, setChatMessages ] = useState<chatMessagesType>([]);
+    const [ showLoadingScreen, setShowLoadingScreen ] = useState(false);
+    const bottomRef = useRef<HTMLDivElement>(null);
+
 
     useEffect(() => {
-        const interval = setInterval(() => {
+        const loadMessages = async () => {
+            setShowLoadingScreen(true)
+            const messages = await fetchChatMessages(personalStudyMode)
             if(!messages) return;
-            setChatMessages(messages)
-            // console.log(chatMessages)
-        }, 500);
-        return () => {
-            clearInterval(interval)
+            setChatMessages(messages);
+            setShowLoadingScreen(false);
         };
-    }, [chatMessages]);
+        loadMessages();
+    }, [setChatMessages, personalStudyMode]);
+
+
+    const scrollToBottom = () => {
+        bottomRef.current?.scrollIntoView({
+            behavior: "smooth"
+        });
+    };
+
 
     return(
         <>
@@ -34,9 +46,11 @@ export default function PersonalStudyPage(){
             <Navbar title={"Personal"} showTitle={true} showProfileIcon={true} showMenuButton={true} />
 
             <section className="flex items-center justify-center w-full h-screen bg-bgdark overflow-hidden">
-                <WorkArea chatMessages={chatMessages} />
-                <InputBar />
+                <WorkArea chatMessages={chatMessages} setChatMessages={setChatMessages} bottomRef={bottomRef} />
+                <InputBar setChatMessages={setChatMessages} scrollToBottom={scrollToBottom} />
             </section>
+
+            {showLoadingScreen && <LoadingScreen />}
         </>
     )
 }
