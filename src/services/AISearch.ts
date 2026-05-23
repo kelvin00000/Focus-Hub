@@ -10,7 +10,7 @@ export async function sendAISearchQuery(query: string, personalStudyMode: boolea
 
     const searchOpenAI = async (prompt: string) => {
         const openai = new OpenAI({
-            apiKey: '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',
+            apiKey: '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',
             dangerouslyAllowBrowser: true
         });
         const completion = await openai.chat.completions.create({
