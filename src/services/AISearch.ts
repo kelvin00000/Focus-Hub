@@ -1,28 +1,23 @@
-// import { type HttpsCallableResult, httpsCallable } from "firebase/functions";
 import { saveSearchResponse } from "./firestore";
-import OpenAI from 'openai';
 
-// const aiSearch = httpsCallable(functions, "aiSearch");
 
 export async function sendAISearchQuery(query: string, personalStudyMode: boolean){
     if(!query) throw new Error
     const isGoogleSearch = false;
 
     const searchOpenAI = async (prompt: string) => {
-        const openai = new OpenAI({
-            apiKey: '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',
-            dangerouslyAllowBrowser: true
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/ai-search`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
         });
-        const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: prompt }],
-            max_tokens: 500
-        });
-        return completion.choices[0].message.content;
+
+        const data = await response.json();
+        return data.text;
     };
 
     const rawResponse = await searchOpenAI(query);
-    // console.log(Rawresponse)
+    // console.log(rawResponse)
 
     if(!rawResponse){
         throw new Error;
@@ -43,6 +38,3 @@ export async function sendAIDocQuery(convertedText: string, query: string, perso
 
     await sendAISearchQuery(prompt, personalStudyMode);
 }
-
-
-// "https://www.googleapis.com/customsearch/v1?key=AIzaSyDoRWFZojCsoopx4Y6vNxurb2IwB37Vmto&cx=95e4d89cdb1164138&q=test"

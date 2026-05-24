@@ -4,8 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { useStudyMode } from "../hooks/useStudyMode";
 import Modal from "./Modal";
 import { sendGoogleSearchQuery } from "../services/googleSearchBackend";
-import type { chatMessagesType } from "../types/messageTypes";
-import { fetchChatMessages, saveUserMessage } from "../services/firestore";
+import { saveUserMessage } from "../services/firestore";
 import LoadingToast from "./Toasttip";
 import { sendAIDocQuery, sendAISearchQuery } from "../services/AISearch";
 import { extractDocumentText } from "../utils/extractDocText";
@@ -14,18 +13,17 @@ import { extractDocumentText } from "../utils/extractDocText";
 
 type props = {
     scrollToBottom: ()=>void
-    setChatMessages: React.Dispatch<React.SetStateAction<chatMessagesType>>
+    renderChatMessages: () => Promise<void>
 }
 
-export default function InputBar({ setChatMessages, scrollToBottom }: props){
+export default function InputBar({ renderChatMessages, scrollToBottom }: props){
     const { personalStudyMode } = useStudyMode();
     const [ placeholderText, setPlaceholderText ] = useState('Type a message here');
     const [ inputText, setInputText ] = useState("");
     const [ inputAction, setInputAction ] = useState("");
-    const [ showNoSearchMethodWarning, setShowNoSearchMethodWarning ] = useState(false);
-    const [ showSendErrorModal, setShowSendErrorModal ] = useState(false);
+    const [ showMessageModal, setShowMessageModal ] = useState(false);
+    const [ modalMessage, setModalMessage ] = useState("");
     const [ showSearchLoadingToast, setShowSearchLoadingToast ] = useState(false);
-    const [ showEmptyQueryModal, setShowEmptyQueryModal ] = useState(false);
     const [ showDocUploadResponseLoadingToast, setShowDocUploadResponseLoadingToast ] = useState(false);
     const textInputRef = useRef<HTMLInputElement>(null)
     const docUploadInputRef = useRef<HTMLInputElement>(null)
@@ -49,44 +47,46 @@ export default function InputBar({ setChatMessages, scrollToBottom }: props){
 
 
     const handleInputActions = async ()=>{
+        if(inputText==="" && docUploadInputRef.current?.files?.[0]){
+            setModalMessage("Make a query first");
+            setShowMessageModal(true);
+            return;
+        }
         if(inputText===undefined||inputText==="") return;
         if(personalStudyMode && (inputAction==="")) {
-            setShowNoSearchMethodWarning(true);
+            setModalMessage("Please select a search method first");
+            setShowMessageModal(true);
             return;
         }
         textInputRef.current!.value = ""
+        setInputText("");
         scrollToBottom();
 
         try{
             if(inputAction==='google'||inputAction==='ai'){
                 setShowSearchLoadingToast(true);
                 await saveUserMessage(inputText, personalStudyMode);
-                const messages = await fetchChatMessages(personalStudyMode)
-                if(!messages) return;
-                setChatMessages(messages)
+                await renderChatMessages();
             }
             if(inputAction==='google') await sendGoogleSearchQuery(inputText, personalStudyMode);
-            else if(inputAction==='ai') await sendAISearchQuery(inputText, personalStudyMode);
+            if(inputAction==='ai') await sendAISearchQuery(inputText, personalStudyMode);
             scrollToBottom()
             if(inputAction==='doc upload') await handleDocUpload();
 
-            const messages = await fetchChatMessages(personalStudyMode)
-            if(!messages) return;
-            setChatMessages(messages)
+            await renderChatMessages();
             setShowSearchLoadingToast(false);
             setShowDocUploadResponseLoadingToast(false);
             scrollToBottom();
         }
         catch(err){
             console.error(err);
-            setShowSendErrorModal(true);
+            setModalMessage("An error occurred. PLease try again");
+            setShowSearchLoadingToast(false);
+            setShowDocUploadResponseLoadingToast(false);
+            setShowMessageModal(true);
         }
     }
     const handleDocUpload = async () => {
-        if(!inputText){
-            setShowEmptyQueryModal(true);
-            return;
-        }
         const file = docUploadInputRef.current?.files?.[0];
         if (!file && !inputText) return;
         setShowDocUploadResponseLoadingToast(true);
@@ -98,7 +98,8 @@ export default function InputBar({ setChatMessages, scrollToBottom }: props){
         catch (err) {
             console.error(err);
             setShowDocUploadResponseLoadingToast(true);
-            setShowSendErrorModal(true)
+            setModalMessage("An error occurred. PLease try again");
+            setShowMessageModal(true);
         }
     };
 
@@ -107,7 +108,7 @@ export default function InputBar({ setChatMessages, scrollToBottom }: props){
             <div className="fixed bottom-[2%] flex flex-col items-center justify-center p-3.5 w-[97%] h-[110px] bg-bgforeground rounded-[30px] text-[#F5F5F5] lg:h-[100px] lg:w-[40%]">
                 <div className="flex items-center justify-between mb-[1%] w-full h-[70%]">
                     <input
-                        className="ml-[15px] w-full border-none outline-none focus:outline-none focus:ring-0 focus:border-gray-600 autofill:bg-none" id="input-text" type="text" placeholder={placeholderText}
+                        className="ml-[15px] pr-5 w-full border-none outline-none focus:outline-none focus:ring-0 focus:border-gray-600 autofill:bg-none" id="input-text" type="text" placeholder={placeholderText}
                         ref={textInputRef}
                         onInput={()=>{
                             setInputText(textInputRef.current?.value||"")
@@ -172,27 +173,11 @@ export default function InputBar({ setChatMessages, scrollToBottom }: props){
             </div>
 
 
-            {showNoSearchMethodWarning && (
+            {showMessageModal && (
                 <Modal
-                    message="Please set a search method first."
+                    message={modalMessage}
                     isMessageModal={true}
-                    setShowModal={setShowNoSearchMethodWarning}
-                />
-            )}
-
-            {showSendErrorModal && (
-                <Modal
-                    message="An error occurred. Please try again."
-                    isMessageModal={true}
-                    setShowModal={setShowSendErrorModal}
-                />
-            )}
-
-            {showEmptyQueryModal && (
-                <Modal
-                    message="Enter a qeury before upload."
-                    isMessageModal={true}
-                    setShowModal={setShowEmptyQueryModal}
+                    setShowModal={setShowMessageModal}
                 />
             )}
 

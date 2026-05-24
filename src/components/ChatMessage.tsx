@@ -7,10 +7,10 @@ import { BotIcon, DownloadIcon } from "lucide-react";
 import { FcGoogle } from "react-icons/fc"
 import { formatMessageTime } from "../utils/formatMessageTime";
 import { user } from "../services/authentication";
-import type { chatMessagesType } from "../types/messageTypes";
 import type { Timestamp } from "firebase/firestore";
-import { deleteMessage, fetchChatMessages } from "../services/firestore";
+import { deleteMessage } from "../services/firestore";
 import { useStudyMode } from "../hooks/useStudyMode";
+import LoadingToast from "./Toasttip";
 
 pdfjs.GlobalWorkerOptions.workerSrc =
   new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
@@ -29,15 +29,16 @@ type props = {
     searchMethod?: string,
     tag: string
     createdAt: Timestamp
-    setChatMessages: React.Dispatch<React.SetStateAction<chatMessagesType>>
+    renderChatMessages: () => Promise<void>
 }
 
 
 
-export default function ChatMessage({id, userId, sender, profileImage, searchMethod, query, response, message, previewUrl, originalUrl, tag, createdAt, setChatMessages}: props){
+export default function ChatMessage({id, userId, sender, profileImage, searchMethod, query, response, message, previewUrl, originalUrl, tag, createdAt, renderChatMessages}: props){
     const { personalStudyMode } = useStudyMode();
     const [ showWarningModal, setShowWarningModal ] = useState(false);
     const [ showDeleteErrorModal, setShowDeleteErrorModal ] = useState(false);
+    const [ showDeleteLoadingToast, setShowDeleteLoadingToast ] = useState(false);
     const timerRef = useRef<number | null>(null);
     const [text, setText] = useState("");
     const messageCard = useRef<HTMLDivElement>(null);
@@ -60,16 +61,17 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
     };
 
     const handleMessageDelete = async () => {
+        setShowDeleteLoadingToast(true);
         try{
             const messageId = messageCard.current?.dataset.messageId;
             await deleteMessage(personalStudyMode, messageId!)
-            const messages = await fetchChatMessages(personalStudyMode)
-            if(!messages) return;
-            setChatMessages(messages);
-            return
+            await renderChatMessages()
+            setShowDeleteLoadingToast(false);
+            return;
         }
         catch(err){
             console.error(err)
+            setShowDeleteLoadingToast(false);
             setShowDeleteErrorModal(true);
             return;
         }
@@ -176,6 +178,13 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
                     message="Delete was unsuccessful. Please try again."
                     isMessageModal={true}
                     setShowModal={setShowDeleteErrorModal}
+                />
+            )}
+
+            {showDeleteLoadingToast && (
+                <LoadingToast
+                    message="Deleting message"
+                    show={showDeleteLoadingToast}
                 />
             )}
         </>

@@ -16,7 +16,7 @@ export default function Navbar({ title, showTitle, showProfileIcon, showMenuButt
     return(
         <>
             {userInfo&&
-                    <div className="fixed flex items-center justify-between mt-0 pl-[5%] pr-[5%] h-[65px] w-full backdrop-blur-sm lg:pl-[2.5%] lg:pr-[2.5%] z-50">
+                    <div className="fixed flex items-center justify-between mt-0 pl-[5%] pr-[5%] h-[55px] w-full backdrop-blur-sm lg:pl-[2.5%] lg:pr-[2.5%] z-50">
                     <div className="flex flex-row gap-2.5 w-[75%]">
                         <img className="w-7.5 h-7.5 rounded-full" src="/logo.jpg" />
                         {showTitle?<span className="text-[#F5F5F5] font-fam-bold text-2xl truncate">{title}</span>:''}

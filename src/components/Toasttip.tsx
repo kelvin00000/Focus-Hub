@@ -11,7 +11,7 @@ const LoadingToast = ({ message, show }: props) => {
                 fixed left-1/2 -translate-x-1/2
                 w-[90%] lg:w-[300px] h-[50px]
                 bg-[#0A1A2F] text-[#0A1A2F]
-                rounded-[14px] z-[999]
+                rounded-[14px] z-9999
                 flex items-center justify-center gap-4 px-5 border-4 border-bgforeground
                 transition-all duration-300 ease-in-out
                 ${show ? "bottom-[15%] lg:bottom-[20%]" : "-bottom-full"}

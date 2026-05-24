@@ -17,19 +17,36 @@ export default function PersonalStudyPage(){
     const { personalStudyMode } = useStudyMode()
     const [ chatMessages, setChatMessages ] = useState<chatMessagesType>([]);
     const [ showLoadingScreen, setShowLoadingScreen ] = useState(false);
+    const [ showNoMessagesScreen, setShowNoMessagesScreen ] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
 
 
+    const renderChatMessages = async()=>{
+        const messages = await fetchChatMessages(personalStudyMode)
+        if(!messages) {
+            console.log("should be working")
+            setShowNoMessagesScreen(true);
+            return;
+        }
+        setShowNoMessagesScreen(false)
+        setChatMessages(messages);
+    }
+    if(showNoMessagesScreen) console.log("working")
+
+    // CODE HAD TO BE DEPLICATED BECAUSE USE-EFFECT WONT ALLOW FUNCTION CALL
     useEffect(() => {
         const loadMessages = async () => {
             setShowLoadingScreen(true)
             const messages = await fetchChatMessages(personalStudyMode)
-            if(!messages) return;
+            if(!messages) {
+                setShowNoMessagesScreen(true);
+                return;
+            }
             setChatMessages(messages);
             setShowLoadingScreen(false);
         };
         loadMessages();
-    }, [setChatMessages, personalStudyMode]);
+    }, [personalStudyMode]);
 
 
     const scrollToBottom = () => {
@@ -46,8 +63,11 @@ export default function PersonalStudyPage(){
             <Navbar title={"Personal"} showTitle={true} showProfileIcon={true} showMenuButton={true} />
 
             <section className="flex items-center justify-center w-full h-screen bg-bgdark overflow-hidden">
-                <WorkArea chatMessages={chatMessages} setChatMessages={setChatMessages} bottomRef={bottomRef} />
-                <InputBar setChatMessages={setChatMessages} scrollToBottom={scrollToBottom} />
+                {!showNoMessagesScreen
+                    ?<WorkArea chatMessages={chatMessages} renderChatMessages={renderChatMessages} bottomRef={bottomRef} />
+                    :<div className="fixed top-[20%]">no messages</div>
+                }
+                <InputBar renderChatMessages={renderChatMessages} scrollToBottom={scrollToBottom} />
             </section>
 
             {showLoadingScreen && <LoadingScreen />}
