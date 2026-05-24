@@ -24,14 +24,14 @@ export default function PersonalStudyPage(){
     const renderChatMessages = async()=>{
         const messages = await fetchChatMessages(personalStudyMode)
         if(!messages) {
-            console.log("should be working")
+            // console.log("should be working")
             setShowNoMessagesScreen(true);
             return;
         }
         setShowNoMessagesScreen(false)
         setChatMessages(messages);
     }
-    if(showNoMessagesScreen) console.log("working")
+    // if(showNoMessagesScreen) console.log("working")
 
     // CODE HAD TO BE DEPLICATED BECAUSE USE-EFFECT WONT ALLOW FUNCTION CALL
     useEffect(() => {

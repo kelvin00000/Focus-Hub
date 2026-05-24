@@ -50,7 +50,7 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
     }, []);
 
     const handleHoldStart = () => {
-        timerRef.current = setTimeout(() => {
+        timerRef.current = window.setTimeout(() => {
             setShowWarningModal(true);
         }, 3000);
     };
