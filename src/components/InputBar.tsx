@@ -8,15 +8,17 @@ import { saveUserMessage } from "../services/firestore";
 import LoadingToast from "./Toasttip";
 import { sendAIDocQuery, sendAISearchQuery } from "../services/AISearch";
 import { extractDocumentText } from "../utils/extractDocText";
+import { uploadToCloudinary, saveToFirestore } from "../services/docShare"
 
 
 
 type props = {
     scrollToBottom: ()=>void
     renderChatMessages: () => Promise<void>
+    groupIdValue?: string
 }
 
-export default function InputBar({ renderChatMessages, scrollToBottom }: props){
+export default function InputBar({ renderChatMessages, scrollToBottom, groupIdValue }: props){
     const { personalStudyMode } = useStudyMode();
     const [ placeholderText, setPlaceholderText ] = useState('Type a message here');
     const [ inputText, setInputText ] = useState("");
@@ -25,9 +27,10 @@ export default function InputBar({ renderChatMessages, scrollToBottom }: props){
     const [ modalMessage, setModalMessage ] = useState("");
     const [ showSearchLoadingToast, setShowSearchLoadingToast ] = useState(false);
     const [ showDocUploadResponseLoadingToast, setShowDocUploadResponseLoadingToast ] = useState(false);
+    const [ showDocShareLoadingToast, setShowDocShareLoadingToast ] = useState(false);
     const textInputRef = useRef<HTMLInputElement>(null)
     const docUploadInputRef = useRef<HTMLInputElement>(null)
-
+    const docShareInputRef = useRef<HTMLInputElement>(null)
     const sampleTexts = ['Upload a document', 'Search for anything', 'Type a message here'];
     useEffect(() => {
         let index = 0;
@@ -65,11 +68,11 @@ export default function InputBar({ renderChatMessages, scrollToBottom }: props){
         try{
             if(inputAction==='google'||inputAction==='ai'){
                 setShowSearchLoadingToast(true);
-                await saveUserMessage(inputText, personalStudyMode);
+                await saveUserMessage(inputText, personalStudyMode, groupIdValue!);
                 await renderChatMessages();
             }
-            if(inputAction==='google') await sendGoogleSearchQuery(inputText, personalStudyMode);
-            if(inputAction==='ai') await sendAISearchQuery(inputText, personalStudyMode);
+            if(inputAction==='google') await sendGoogleSearchQuery(inputText, personalStudyMode, groupIdValue!);
+            if(inputAction==='ai') await sendAISearchQuery(inputText, personalStudyMode, groupIdValue!);
             scrollToBottom()
             if(inputAction==='doc upload') await handleDocUpload();
 
@@ -93,7 +96,7 @@ export default function InputBar({ renderChatMessages, scrollToBottom }: props){
 
         try {
             const convertedText = await extractDocumentText(file!)
-            await sendAIDocQuery(convertedText, inputText, personalStudyMode)
+            await sendAIDocQuery(convertedText, inputText, personalStudyMode, groupIdValue!)
         }
         catch (err) {
             console.error(err);
@@ -102,6 +105,23 @@ export default function InputBar({ renderChatMessages, scrollToBottom }: props){
             setShowMessageModal(true);
         }
     };
+    const handleShareDoc = async () => {
+        const file = docShareInputRef.current?.files?.[0];
+        if (!file) return;
+        setShowDocShareLoadingToast(true);
+
+        try {
+            const { originalUrl, fileType, fileName } = await uploadToCloudinary(file);
+            await saveToFirestore(fileName, fileType, originalUrl, personalStudyMode, groupIdValue!);
+
+            setShowDocShareLoadingToast(false);
+            await renderChatMessages();
+        }
+        catch (error) {
+            console.error(error)
+            setShowDocShareLoadingToast(false)
+        }
+    }
 
     return(
         <>
@@ -114,14 +134,17 @@ export default function InputBar({ renderChatMessages, scrollToBottom }: props){
                             setInputText(textInputRef.current?.value||"")
                         }}
                     />
-                    {!personalStudyMode?
+                    {!personalStudyMode&&
                         <>
-                            <input className="hidden" type="file" id="share-document" />
+                            <input
+                                onInput={()=>{handleShareDoc()}}
+                                ref={docShareInputRef}
+                                className="hidden" type="file" id="share-document"
+                            />
                             <label className="flex items-center justify-center mr-[2%] p-1.5 rounded-full border border-[#0A1A2F]" htmlFor="share-document">
                                 <Paperclip size={20} className="cursor-pointer" />
                             </label>
                         </>
-                    :''
                     }
                     <button
                         className="p-2.5 rounded-full border border-gray-800 bg-[#0A1A2F] cursor-pointer"
@@ -192,6 +215,13 @@ export default function InputBar({ renderChatMessages, scrollToBottom }: props){
                 <LoadingToast
                     message="Loading Upload Response"
                     show={showDocUploadResponseLoadingToast}
+                />
+            )}
+
+            {showDocShareLoadingToast && (
+                <LoadingToast
+                    message="sharing"
+                    show={showDocShareLoadingToast}
                 />
             )}
         </>

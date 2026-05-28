@@ -1,7 +1,7 @@
 import { saveSearchResponse } from "./firestore";
 
 
-export async function sendGoogleSearchQuery(query: string, personalStudyMode: boolean){
+export async function sendGoogleSearchQuery(query: string, personalStudyMode: boolean, groupId: string){
     if(!query) return;
     const isGoogleSearch = true;
 
@@ -23,5 +23,5 @@ export async function sendGoogleSearchQuery(query: string, personalStudyMode: bo
     if(!response){
         throw new Error;
     }
-    await saveSearchResponse(query, response, personalStudyMode, isGoogleSearch)
+    await saveSearchResponse(query, response, personalStudyMode, isGoogleSearch, groupId)
 }

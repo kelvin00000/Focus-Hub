@@ -8,8 +8,9 @@ export type MessageType = {
     message?: string
     query?: string
     response?: string
-    previewUrl?: string
-    originalUrl?: string
+    fileName?: string
+    url?: string
+    isDoc?: boolean
     searchMethod?: string,
     tag: string
     createdAt: Timestamp
@@ -23,7 +24,9 @@ export type chatMessagesType = {
     message?: string
     query?: string
     response?: string
-    previewUrl?: string
+    fileName?: string
+    url?: string
+    isDoc?: boolean
     originalUrl?: string
     searchMethod?: string,
     tag: string

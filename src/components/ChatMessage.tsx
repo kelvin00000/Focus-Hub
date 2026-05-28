@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+// import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
 import "react-pdf/dist/Page/TextLayer.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import Modal from "./Modal";
-import { BotIcon, DownloadIcon } from "lucide-react";
+import { BotIcon, DownloadIcon, FileIcon } from "lucide-react";
 import { FcGoogle } from "react-icons/fc"
 import { formatMessageTime } from "../utils/formatMessageTime";
 import { user } from "../services/authentication";
@@ -11,9 +12,9 @@ import type { Timestamp } from "firebase/firestore";
 import { deleteMessage } from "../services/firestore";
 import { useStudyMode } from "../hooks/useStudyMode";
 import LoadingToast from "./Toasttip";
+import { downloadOriginalFile } from "../services/docShare";
 
-pdfjs.GlobalWorkerOptions.workerSrc =
-  new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
 
 
 type props = {
@@ -24,17 +25,19 @@ type props = {
     message?: string
     query?: string
     response?: string
-    previewUrl?: string
-    originalUrl?: string
+    fileName?: string
+    url?: string
+    isDoc?: boolean
     searchMethod?: string,
     tag: string
     createdAt: Timestamp
     renderChatMessages: () => Promise<void>
+    groupIdValue?: string
 }
 
 
 
-export default function ChatMessage({id, userId, sender, profileImage, searchMethod, query, response, message, previewUrl, originalUrl, tag, createdAt, renderChatMessages}: props){
+export default function ChatMessage({id, userId, sender, profileImage, searchMethod, query, response, message, fileName, url, isDoc, tag, createdAt, renderChatMessages, groupIdValue}: props){
     const { personalStudyMode } = useStudyMode();
     const [ showWarningModal, setShowWarningModal ] = useState(false);
     const [ showDeleteErrorModal, setShowDeleteErrorModal ] = useState(false);
@@ -44,7 +47,7 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
     const messageCard = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        fetch(`${previewUrl}`)
+        fetch(`${url}`)
         .then((res) => res.text())
         .then((data) => setText(data));
     }, []);
@@ -64,7 +67,7 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
         setShowDeleteLoadingToast(true);
         try{
             const messageId = messageCard.current?.dataset.messageId;
-            await deleteMessage(personalStudyMode, messageId!)
+            await deleteMessage(personalStudyMode, messageId!, groupIdValue!)
             await renderChatMessages()
             setShowDeleteLoadingToast(false);
             return;
@@ -74,6 +77,14 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
             setShowDeleteLoadingToast(false);
             setShowDeleteErrorModal(true);
             return;
+        }
+    }
+    const handleDocDownload = async (url: string, fileName: string) => {
+        try {
+            await downloadOriginalFile(url, fileName);
+        }
+        catch (error) {
+            console.error(error)
         }
     }
 
@@ -120,21 +131,23 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
                     : ''
                     }
 
-                    {tag==='image'
-                        ? <img className="object-cover rounded-[18px]" src={previewUrl} onClick={() => {window.open(originalUrl)}} />
-                        :tag==='pdf'
+                    {tag==='image/png'||tag==='image/jpg'||tag==='image/webp'||tag==='image/jpeg'
+                        ? <img className="object-cover rounded-[18px]" src={url} onClick={() => {window.open(url)}} />
+                    :tag==='application/pdf'
                         ? <div className="max-h-[140px] overflow-hidden">
-                            <Document file={previewUrl} onClick={() => {window.open(originalUrl)}}>
+                            <Document file={url} onClick={() => {window.open(url)}}>
                                 <Page pageNumber={1} width={250} height={25} />
                             </Document>
                         </div>
-                        :tag==='doc'
-                        ?<div className="max-h-[140px] overflow-hidden">
-                            <Document file={previewUrl} onClick={() => {window.open(originalUrl)}}>
-                                <Page pageNumber={1} width={250} height={25} />
-                            </Document>
+                    :tag==='application/vnd.openxmlformats-officedocument.wordprocessingml.document'||tag==='application/vnd.openxmlformats-officedocument.presentationml.presentation'
+                        ?<div
+                            className="cursor-pointer flex flex-col items-center gap-2"
+                            onClick={() => window.open(url)}
+                        >
+                            <FileIcon size={70} className="text-bgtext" />
+                            <span className="line-clamp-1">{fileName}</span>
                         </div>
-                        :tag==='text'
+                    :tag==='text/plain'
                         ?<div className="">
                             <pre className="whitespace-pre-wrap text-sm">
                                 {text}
@@ -144,17 +157,22 @@ export default function ChatMessage({id, userId, sender, profileImage, searchMet
                     }
 
                     <div className="flex items-end justify-between mt-[15px]">
-                        <div className="text-[15px] text-blue-950 italic">{tag}</div>
+                        <div className="text-[15px] text-blue-950 italic">
+                        {tag==="application/vnd.openxmlformats-officedocument.presentationml.presentation"?"pptx"
+                        :tag==="application/vnd.openxmlformats-officedocument.wordprocessingml.document"? "docx"
+                        :tag
+                        }
+                        </div>
 
                         <div className="flex flex-col items-center justify-center gap-1.5">
-                            {tag==='doc'||tag==='image'||tag==='text'||tag==='pdf'
+                            {isDoc
                                 ?<button
                                     className="p-2.5 rounded-full border border-gray-800 bg-[#0A1A2F] cursor-pointer"
                                     onClick={() => {
-                                        // place download function call here
+                                        handleDocDownload(url!, fileName!)
                                     }}
                                 >
-                                    <DownloadIcon size={18} color="#F5F5F5" />
+                                    <DownloadIcon size={18} className="text-bgtext" />
                                 </button>
                                 :''
                             }

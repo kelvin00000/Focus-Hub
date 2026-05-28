@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import type { Timestamp } from "firebase/firestore";
 
 
 type props = {
@@ -9,17 +10,24 @@ type props = {
     isRemoveAccountModal?: boolean,
     handleAccountRemoval?: () => Promise<void>,
     handleMessageDelete?: () => Promise<void>
-    isJoinMeetingModal?: boolean,
-    isCreateMeetingModal?: boolean
+    handleGroupAction?: (action: string, groupId?: string, groupName?: string, dateJoined?: Timestamp) => Promise<void>
+    isJoinGroupModal?: boolean,
+    isCreateGroupModal?: boolean
+    isDeleteGroupModal?: boolean,
+    isLeaveGroupModal?: boolean,
+    isChangeGroupNameModal?: boolean,
+    changeGroupButtonRef?: React.RefObject<HTMLButtonElement|null>
+    deleteGroupButtonRef?: React.RefObject<HTMLButtonElement|null>
+    leaveGroupButtonRef?: React.RefObject<HTMLButtonElement|null>
     setShowModal: React.Dispatch<
         React.SetStateAction<boolean>
     >;
 }
 
-export default function Modal({message, isMessageModal, isDeleteMessageModal, isRemoveAccountModal, handleAccountRemoval, handleMessageDelete, isJoinMeetingModal, isCreateMeetingModal, setShowModal}: props){
+export default function Modal({message, isMessageModal, isDeleteMessageModal, isRemoveAccountModal, handleAccountRemoval, handleMessageDelete, isJoinGroupModal, isCreateGroupModal, isDeleteGroupModal, isChangeGroupNameModal, isLeaveGroupModal, changeGroupButtonRef, leaveGroupButtonRef, deleteGroupButtonRef, setShowModal, handleGroupAction}: props){
     const [inputText, setinputText] = useState(localStorage.getItem("inputText") || "");
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cacheInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         setinputText(e.target.value);
         localStorage.setItem(
             "inputText",
@@ -27,10 +35,6 @@ export default function Modal({message, isMessageModal, isDeleteMessageModal, is
         );
     };
 
-    function joinMeeting(){
-    }
-    function createMeeting(){
-    }
 
     return(
         <>
@@ -41,12 +45,12 @@ export default function Modal({message, isMessageModal, isDeleteMessageModal, is
                             {message}
                         </p>
 
-                        {(isJoinMeetingModal || isCreateMeetingModal) &&
+                        {(isJoinGroupModal || isCreateGroupModal || isChangeGroupNameModal) &&
                             <input
                                 value={inputText}
-                                onChange={handleChange}
+                                onChange={cacheInput}
                                 type="text"
-                                placeholder={isJoinMeetingModal?"Meeting Code":isCreateMeetingModal?"Group Name":""}
+                                placeholder={isJoinGroupModal?"Meeting Code":isCreateGroupModal?"Group Name":isChangeGroupNameModal? "Group Name": ""}
                                 className=" w-full py-2 text-center text-white placeholder:text-gray-500 bg-transparent border-0 border-b border-gray-600 outline-none focus:outline-none focus:ring-0 focus:border-gray-600 autofill:bg-transparent"
                             />
                         }
@@ -62,29 +66,32 @@ export default function Modal({message, isMessageModal, isDeleteMessageModal, is
                         {isMessageModal?'':''}
 
                         {
-                            (isDeleteMessageModal || isRemoveAccountModal) &&
+                            (isDeleteMessageModal || isRemoveAccountModal || isDeleteGroupModal || isLeaveGroupModal) &&
                             <button
                                 className="flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-gray-300"
                                 onClick={() => {
                                     if (isDeleteMessageModal) handleMessageDelete?.()
-                                        else handleAccountRemoval?.();
+                                    else if(isRemoveAccountModal) handleAccountRemoval?.();
+                                    else if(isLeaveGroupModal) handleGroupAction!("leave", leaveGroupButtonRef?.current?.dataset.groupId,"")
+                                    else handleGroupAction!("delete", deleteGroupButtonRef?.current?.dataset.groupId,"")
                                 }}
                             >
                                 <Trash2 size={20} className="text-bgtext" />
-                                {isDeleteMessageModal?"Delete":"Continue"}
+                                {isDeleteMessageModal?"Delete": isRemoveAccountModal?"Continue": isLeaveGroupModal?"Leave": "Remove"}
                             </button>
                         }
 
                         {
-                            (isJoinMeetingModal || isCreateMeetingModal) &&
+                            (isJoinGroupModal || isCreateGroupModal || isChangeGroupNameModal) &&
                             <button
                                 className="px-4 py-2 text-bgforeground rounded-[15px] bg-bgtext cursor-pointer"
                                 onClick={() => {
-                                    if (isJoinMeetingModal) joinMeeting()
-                                        else createMeeting()
+                                    if (isCreateGroupModal) handleGroupAction!("create", "", inputText)
+                                    else if(isJoinGroupModal) handleGroupAction!("join", inputText ,"")
+                                    else handleGroupAction!("update", changeGroupButtonRef?.current?.dataset.groupId, inputText)
                                 }}
                             >
-                                {isJoinMeetingModal?"Join":"Create"}
+                                {isJoinGroupModal?"Join": isCreateGroupModal?"Create": "Change"}
                             </button>
                         }
                     </div>

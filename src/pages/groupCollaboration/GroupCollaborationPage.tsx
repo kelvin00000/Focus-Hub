@@ -1,44 +1,97 @@
-import { useState } from "react";
-import { Users } from "lucide-react"
+import type { DocumentData } from "firebase/firestore";
+import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router";
+import { Users, ChevronLeft } from "lucide-react"
 import Navbar from "../../components/Navbar";
-// import WorkArea from "../../components/WorkArea";
-// import InputBar from "../../components/InputBar";
+import WorkArea from "../../components/WorkArea";
+import InputBar from "../../components/InputBar";
 import ActiveMembersModal from "./ActiveMembersModal";
 import { useAuth } from "../../hooks/useAuth";
+import { type chatMessagesType } from "../../types/messageTypes";
+import { useStudyMode } from "../../hooks/useStudyMode";
+import { fetchChatMessages, fetchGroupInfo, removeGroupMember } from "../../services/firestore";
+import LoadingScreen from "../../components/LoadingScreen";
+import NoResultsScreen from "../../components/NoResultsScreen";
 
 
-// FETCH CURRENT GROUP INFO HERE AND PASS TO MODAL
 
 type props = {
     groupCollaborationPageTitle: string
+    groupIdValue: string
 }
 
-export default function GroupCollaborationPage({ groupCollaborationPageTitle }: props){
+export default function GroupCollaborationPage({ groupCollaborationPageTitle, groupIdValue }: props){
     useAuth();
-    const [showMembersModal, setShowMembersModal] = useState(false);
-    const [ activeSession ] = useState({
-        meetingName: "Networking group",
-        meetingId: 802848203923, //USE FIRESTORE AUTOID AS DOC ID
-        meetingCode: "23hjnj23ht",
-        meetingCreator: "Carter",
-        memberNo: 13,
-        members: [
-            { name: "Carter", id: 924839, joined: "12th May 2026" },
-            { name: "Maya", id: 9034839, joined: "12th May 2026" },
-            { name: "Ethan", id: 4829173, joined: "3rd June 2026" },
-            { name: "Sophia", id: 1947265, joined: "21st June 2026" },
-            { name: "Noah", id: 8372614, joined: "8th March 2026" },
-            { name: "Olivia", id: 5619082, joined: "17th July 2026" },
-            { name: "Liam", id: 2754810, joined: "29th May 2026" },
-            { name: "Ava", id: 6483721, joined: "14th May 2026" },
-            { name: "Daniel", id: 9182736, joined: "6th August 2026" },
-            { name: "Chloe", id: 3548192, joined: "25th September 2026" },
-            { name: "James", id: 7261548, joined: "11th October 2026" },
-            { name: "Isabella", id: 4839201, joined: "2nd November 2026" },
-            { name: "Kelvin", id: 6157483, joined: "19th December 2026" }
-        ],
-        createdAt: "12th May 2026"
-    })
+    const { personalStudyMode } = useStudyMode()
+    const [ chatMessages, setChatMessages ] = useState<chatMessagesType>([]);
+    const [ showLoadingScreen, setShowLoadingScreen ] = useState(false);
+    const [ showMembersModal, setShowMembersModal ] = useState(false);
+    const [ showNoMessagesScreen, setShowNoMessagesScreen ] = useState(false);
+    const [ groupInfo, setGroupInfo ] = useState<DocumentData>()
+    const bottomRef = useRef<HTMLDivElement>(null);
+
+
+    const renderChatMessages = async()=>{
+        try {
+            const messages = await fetchChatMessages(personalStudyMode, groupIdValue)
+            if(messages!.length===0) {
+                setShowLoadingScreen(false);
+                setShowNoMessagesScreen(true);
+                return;
+            }
+            setShowNoMessagesScreen(false)
+            setChatMessages(messages!);
+        }
+        catch(error) {
+            console.error(error)
+            setShowLoadingScreen(false);
+        }
+    }
+
+    const handleGroupMemberRemove = async ( id: string, name: string, profileImage: string )=>{
+        try {
+            setShowLoadingScreen(true);
+            await removeGroupMember(groupIdValue, id, name, profileImage)
+            const groupInfo = await fetchGroupInfo(personalStudyMode, groupIdValue);
+            setGroupInfo(groupInfo);
+            setShowLoadingScreen(false);
+        }
+        catch (error) {
+            console.error(error)
+            setShowLoadingScreen(false);
+        }
+    }
+
+    // CODE HAD TO BE DEPLICATED BECAUSE USE-EFFECT WONT ALLOW FUNCTION CALL
+    useEffect(() => {
+        const loadMessages = async () => {
+            setShowLoadingScreen(true)
+            const messages = await fetchChatMessages(personalStudyMode, groupIdValue)
+            if(messages!.length===0) {
+                setShowLoadingScreen(false);
+                setShowNoMessagesScreen(true);
+                return;
+            }
+            setChatMessages(messages!);
+            setShowLoadingScreen(false);
+        };
+
+        const loadGroupMmberInfo = async ()=>{
+            const groupInfo = await fetchGroupInfo(personalStudyMode, groupIdValue);
+            setGroupInfo(groupInfo);
+        }
+
+        loadGroupMmberInfo()
+        loadMessages();
+    }, [personalStudyMode, groupIdValue]);
+
+
+    const scrollToBottom = () => {
+        bottomRef.current?.scrollIntoView({
+            behavior: "smooth"
+        });
+    };
+
 
     return(
         <>
@@ -46,21 +99,35 @@ export default function GroupCollaborationPage({ groupCollaborationPageTitle }: 
 
             <Navbar title={groupCollaborationPageTitle} showTitle={true} showProfileIcon={true} showMenuButton={true} />
 
+            <Link to="/activecollaborations"
+                className="fixed top-[5%] right-[0%] lg:top-[8%] lg:right-[1%] flex items-center justify-center py-3 px-5.5 text-bgforeground rounded-[15px] cursor-pointer z-40"
+            >
+                <ChevronLeft size={30} className="mr-1.5 text-bgtext" />
+                <span className="text-bgtext">Back</span>
+            </Link>
+
             <button
-                className="fixed top-[8%] right-[5%] lg:top-[12%] lg:right-[3%] p-4 bg-[#0A1A2F] border border-gray-500 rounded-full cursor-pointer z-40"
+                className="fixed top-[11%] right-[5%] lg:top-[16%] lg:right-[3%] p-4 bg-[#0A1A2F] border border-gray-500 rounded-full cursor-pointer z-40"
                 onClick={() => { setShowMembersModal(true) }}
-                >
+            >
                     <Users size={20} className="text-bgtext" />
             </button>
 
             <section className="flex items-center justify-center w-full h-screen bg-bgdark">
-                {/* <WorkArea /> */}
-                {/* <InputBar /> */}
+                {!showNoMessagesScreen
+                    ?<WorkArea chatMessages={chatMessages} renderChatMessages={renderChatMessages} bottomRef={bottomRef} groupIdValue={groupIdValue} />
+                    :<NoResultsScreen message="Looks like you have no messages" actionMessage="Type something" />
+                }
+                <InputBar renderChatMessages={renderChatMessages} scrollToBottom={scrollToBottom} groupIdValue={groupIdValue} />
             </section>
 
+
+
             {showMembersModal && (
-                <ActiveMembersModal setShowModal={setShowMembersModal} activeSession={activeSession} />
+                <ActiveMembersModal setShowModal={setShowMembersModal} groupInfo={groupInfo} handleGroupMemberRemove={handleGroupMemberRemove} />
             )}
+
+            {showLoadingScreen && <LoadingScreen />}
         </>
     )
 }

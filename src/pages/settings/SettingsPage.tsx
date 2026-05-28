@@ -7,27 +7,8 @@ import { SunIcon, Users, LockIcon, LayoutDashboardIcon, Trash2 } from "lucide-re
 import { useAuth } from "../../hooks/useAuth";
 import LoadingScreen from "../../components/LoadingScreen";
 import { useUserContext } from "../../hooks/useUserContext";
+import { formatJoinDate } from "../../utils/formatJoinDate";
 
-function getDateJoined(timestamp: {
-  seconds: number;
-  nanoseconds: number;
-}) {
-    const parsedDate = new Date(
-        timestamp.seconds * 1000
-    );
-    const day = parsedDate.getDate();
-    const suffix =
-        day % 10 === 1 && day !== 11
-        ? "st"
-        : day % 10 === 2 && day !== 12
-        ? "nd"
-        : day % 10 === 3 && day !== 13
-        ? "rd"
-        : "th";
-    const month = parsedDate.toLocaleString("default",{ month: "long" });
-    const year = parsedDate.getFullYear();
-    return `${day}${suffix} ${month} ${year}`;
-}
 
 // type props = {
 //      userInfo: DocumentData|null|undefined
@@ -71,7 +52,7 @@ export default function SettingsPage(){
 
                             <div className="flex flex-col">
                                 <span className="w-[85%] font-bold text-[1.8rem] truncate  lg:text-[2rem]">{userInfo.name}</span>
-                                <span className="text-gray-500 text-sm">Joined <span>{getDateJoined(userInfo.createdAt)}</span></span>
+                                <span className="text-gray-500 text-sm">Joined <span>{formatJoinDate(userInfo.createdAt)}</span></span>
                             </div>
                         </div>
 
@@ -152,9 +133,7 @@ export default function SettingsPage(){
                 />
             )}
 
-            {!userInfo && <LoadingScreen />}
-
-            {isLoading && <LoadingScreen />}
+            {(isLoading || !userInfo) && <LoadingScreen />}
         </>
     )
 }

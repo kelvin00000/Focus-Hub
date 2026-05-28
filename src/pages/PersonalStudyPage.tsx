@@ -7,6 +7,7 @@ import { fetchChatMessages } from "../services/firestore";
 import type { chatMessagesType } from "../types/messageTypes";
 import { useStudyMode } from "../hooks/useStudyMode";
 import LoadingScreen from "../components/LoadingScreen";
+import NoResultsScreen from "../components/NoResultsScreen";
 
 // type props = {
 //
@@ -23,26 +24,26 @@ export default function PersonalStudyPage(){
 
     const renderChatMessages = async()=>{
         const messages = await fetchChatMessages(personalStudyMode)
-        if(!messages) {
-            // console.log("should be working")
+        if(messages!.length===0) {
+            setShowLoadingScreen(false);
             setShowNoMessagesScreen(true);
             return;
         }
         setShowNoMessagesScreen(false)
-        setChatMessages(messages);
+        setChatMessages(messages!);
     }
-    // if(showNoMessagesScreen) console.log("working")
 
     // CODE HAD TO BE DEPLICATED BECAUSE USE-EFFECT WONT ALLOW FUNCTION CALL
     useEffect(() => {
         const loadMessages = async () => {
             setShowLoadingScreen(true)
             const messages = await fetchChatMessages(personalStudyMode)
-            if(!messages) {
+            if(messages!.length===0) {
+                setShowLoadingScreen(false);
                 setShowNoMessagesScreen(true);
                 return;
             }
-            setChatMessages(messages);
+            setChatMessages(messages!);
             setShowLoadingScreen(false);
         };
         loadMessages();
@@ -60,12 +61,12 @@ export default function PersonalStudyPage(){
         <>
             <title>Personal Study</title>
 
-            <Navbar title={"Personal"} showTitle={true} showProfileIcon={true} showMenuButton={true} />
+            <Navbar title={"Personal Study"} showTitle={true} showProfileIcon={true} showMenuButton={true} />
 
             <section className="flex items-center justify-center w-full h-screen bg-bgdark overflow-hidden">
                 {!showNoMessagesScreen
                     ?<WorkArea chatMessages={chatMessages} renderChatMessages={renderChatMessages} bottomRef={bottomRef} />
-                    :<div className="fixed top-[20%]">no messages</div>
+                    :<NoResultsScreen message="Looks like you have no messages" actionMessage="Type something" />
                 }
                 <InputBar renderChatMessages={renderChatMessages} scrollToBottom={scrollToBottom} />
             </section>

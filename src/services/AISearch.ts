@@ -1,7 +1,7 @@
 import { saveSearchResponse } from "./firestore";
 
 
-export async function sendAISearchQuery(query: string, personalStudyMode: boolean){
+export async function sendAISearchQuery(query: string, personalStudyMode: boolean, groupId: string){
     if(!query) throw new Error
     const isGoogleSearch = false;
 
@@ -22,12 +22,12 @@ export async function sendAISearchQuery(query: string, personalStudyMode: boolea
     if(!rawResponse){
         throw new Error;
     }
-    saveSearchResponse(query, rawResponse!, personalStudyMode, isGoogleSearch)
+    saveSearchResponse(query, rawResponse!, personalStudyMode, isGoogleSearch, groupId)
 }
 
 
 
-export async function sendAIDocQuery(convertedText: string, query: string, personalStudyMode: boolean){
+export async function sendAIDocQuery(convertedText: string, query: string, personalStudyMode: boolean, groupId: string){
     if(!convertedText) throw new Error();
 
     // Construct final prompt
@@ -36,5 +36,5 @@ export async function sendAIDocQuery(convertedText: string, query: string, perso
     Question: ${query}
     Please answer the question based on the document content.`;
 
-    await sendAISearchQuery(prompt, personalStudyMode);
+    await sendAISearchQuery(prompt, personalStudyMode, groupId);
 }
